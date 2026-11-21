@@ -1,0 +1,772 @@
+<!-- impeccable:disable numbered-section-markers -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Report · How to Actually Code with AI (NetworkChuck × Matt Pocock)</title>
+<style>
+:root{
+  --ink: var(--foreground, #e8e6e2);
+  --dim: var(--muted-foreground, #b0afa9);
+  --bg: var(--background, #101014);
+  --card: var(--card, #17171c);
+  --line: var(--border, #2b2b33);
+  --acc: var(--accent, #7fd8a8);
+  --acc-soft: color-mix(in srgb, var(--acc, #7fd8a8) 14%, transparent);
+  --warn: #e8b464;
+  --serif: Georgia, 'Times New Roman', serif;
+  --sans: var(--font-sans, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  --mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--sans); background:var(--bg); color:var(--ink);
+  line-height:1.6; font-size:15px;
+  max-width:960px; margin:0 auto; padding:0 20px 80px;
+}
+a{color:var(--acc); text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4{font-family:var(--serif); font-weight:600; letter-spacing:-.01em}
+h1{font-size:34px; line-height:1.15; margin:8px 0 12px}
+h2{font-size:26px; margin:0 0 6px}
+h3{font-size:18px; margin:0 0 6px}
+p.dim, .dim{color:var(--dim)}
+code, .mono{font-family:var(--mono)}
+code{font-size:13px; background:var(--acc-soft); padding:1px 6px; border-radius:4px}
+pre{background:var(--card); border:1px solid var(--line); border-radius:8px;
+  padding:12px 14px; overflow-x:auto; font-size:13px; margin:8px 0}
+pre code{background:none; padding:0}
+.kicker{font-size:12px; text-transform:uppercase; letter-spacing:.14em; color:var(--acc); font-family:var(--sans); font-weight:600}
+section{margin-top:56px; scroll-margin-top:64px}
+.sec-head{border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:18px}
+.sec-head p{font-size:14px}
+
+/* NAV */
+nav{position:sticky; top:0; z-index:50; background:color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter:blur(6px); border-bottom:1px solid var(--line); margin:0 -20px 0; padding:0 8px;
+  display:flex; gap:2px; overflow-x:auto; white-space:nowrap; align-items:center}
+nav::-webkit-scrollbar{display:none}
+nav{scrollbar-width:none}
+nav a{padding:12px 12px; font-size:13px; color:var(--dim); border-bottom:2px solid transparent; font-family:var(--sans)}
+nav a.on{color:var(--ink); border-bottom-color:var(--acc)}
+nav a:hover{text-decoration:none; color:var(--ink)}
+
+/* HERO */
+.hero{padding-top:36px}
+.hero .meta{display:flex; flex-wrap:wrap; gap:16px; font-size:13px; color:var(--dim); margin:10px 0 18px}
+.stat-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden; margin:18px 0}
+.stat-grid div{background:var(--card); padding:14px 16px}
+.stat-grid b{display:block; font-size:20px; font-family:var(--serif); color:var(--acc)}
+.stat-grid span{font-size:12px; color:var(--dim)}
+.bigword{font-family:var(--serif); font-size:56px; line-height:1; color:var(--acc); font-style:italic}
+
+/* TIMELINE */
+.chap{display:grid; grid-template-columns:92px 1fr; gap:14px; padding:10px 0; border-bottom:1px solid var(--line)}
+.chap time{font-family:var(--mono); font-size:13px; color:var(--acc); padding-top:2px}
+.chap small{display:block; font-size:13px; color:var(--dim)}
+
+/* ACCORDION CARDS (flat, no nesting) */
+.acc{border-bottom:1px solid var(--line)}
+.acc-btn{width:100%; text-align:left; background:none; border:0; color:var(--ink); cursor:pointer;
+  padding:13px 2px; display:flex; justify-content:space-between; align-items:baseline; gap:12px; font:inherit}
+.acc-btn .t{font-weight:600; font-size:15px}
+.acc-btn .m{font-size:12px; color:var(--dim); font-family:var(--mono); flex-shrink:0}
+.acc-btn:hover .t{color:var(--acc)}
+.acc-body{display:none; padding:0 2px 16px; font-size:14px; color:var(--ink)}
+.acc.open .acc-body{display:block}
+.acc-btn .chev{transition:transform .2s; color:var(--dim)}
+.acc.open .chev{transform:rotate(90deg)}
+.quote{font-family:var(--serif); font-style:italic; color:var(--dim); border-left:2px solid var(--acc);
+  padding:2px 0 2px 14px; margin:10px 0; font-size:15px}
+.quote small{display:block; font-style:normal; font-family:var(--sans); font-size:12px; margin-top:4px}
+.group-label{font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--acc); margin:26px 0 8px}
+
+/* FIGURES */
+.fig{border:1px solid var(--line); border-radius:10px; background:var(--card); padding:18px; margin:16px 0}
+.fig svg{width:100%; height:auto; display:block}
+.figcap{font-size:12px; color:var(--dim); margin-top:10px; text-align:center}
+svg text{font-family:var(--sans); font-size:12px; fill:var(--ink)}
+svg .sm{font-size:12px}
+
+/* SETUP STEPS */
+.step{display:grid; grid-template-columns:44px 1fr; gap:12px; padding:14px 0; border-bottom:1px solid var(--line)}
+.step .n{font-family:var(--serif); font-size:22px; color:var(--acc); line-height:1.3}
+.step h3{margin-bottom:4px}
+.step p{font-size:14px; color:var(--ink)}
+.step ul{margin:6px 0 0 18px; font-size:14px}
+
+/* STUDY GUIDE */
+.progress-wrap{border:1px solid var(--line); border-radius:10px; padding:14px 16px; background:var(--card); margin-bottom:20px}
+.progress-track{height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin-top:8px}
+.progress-fill{height:100%; background:var(--acc); border-radius:99px; width:0%; transition:width .3s ease}
+.mod{border:1px solid var(--line); border-radius:10px; padding:16px; margin:12px 0; background:var(--card)}
+.mod h3{display:flex; gap:10px; align-items:baseline}
+.mod .week{font-size:12px; color:var(--warn); font-family:var(--mono); white-space:nowrap}
+.mod ul{margin:8px 0 0 18px; font-size:14px}
+.mod li{margin:3px 0}
+.mod label{display:flex; gap:10px; align-items:flex-start; font-size:14px; margin:6px 0; cursor:pointer}
+.mod input[type=checkbox]{accent-color:var(--acc); width:16px; height:16px; margin-top:3px; flex-shrink:0}
+.mod .deliv{font-size:13px; margin-top:10px; padding-top:8px; border-top:1px solid var(--line)}
+.mod.done{opacity:.6}
+.mod .tagrow{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+.mod .tag{font-size:12px; border:1px solid var(--line); border-radius:99px; padding:2px 10px; color:var(--dim)}
+.mod input:checked ~ .body-hide{}
+
+/* TABLES */
+table{width:100%; border-collapse:collapse; font-size:14px; margin:12px 0}
+th{text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); padding:8px 10px; border-bottom:1px solid var(--line)}
+td{padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top}
+td:first-child{font-weight:600}
+.paso{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border:1px solid var(--acc, #7fd8a8);border-radius:99px;font-size:12px;color:var(--acc, #7fd8a8);font-family:var(--mono);margin-right:9px;font-weight:400}
+tr:hover td{background:color-mix(in srgb, var(--acc) 5%, transparent)}
+
+/* PEOPLE */
+.person{padding:16px 0; border-bottom:1px solid var(--line)}
+.person h3 a{color:var(--ink)}
+.person .links{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+.person .links a{font-size:12px; border:1px solid var(--line); border-radius:99px; padding:3px 12px; color:var(--dim)}
+.person .links a:hover{border-color:var(--acc); color:var(--acc); text-decoration:none}
+
+/* QUOTES WALL */
+.qwall{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden}
+.qwall blockquote{background:var(--card); padding:18px; font-family:var(--serif); font-style:italic; font-size:15px; line-height:1.5}
+.qwall blockquote cite{display:block; font-style:normal; font-family:var(--sans); font-size:12px; color:var(--dim); margin-top:8px}
+@media (max-width:640px){ .qwall{grid-template-columns:1fr} h1{font-size:27px} .bigword{font-size:40px} }
+
+.note{font-size:13px; color:var(--dim); border:1px solid var(--line); border-left:2px solid var(--warn); padding:10px 14px; margin:14px 0; background:none}
+.copybtn{float:right; font-size:12px; background:none; border:1px solid var(--line); border-radius:6px; color:var(--dim); cursor:pointer; padding:2px 8px; font-family:var(--sans)}
+.copybtn:hover{color:var(--acc); border-color:var(--acc)}
+
+.tr-en{display:none}
+body.lang-en .tr-es{display:none}
+body.lang-en .tr-en{display:inline}
+#langToggle{margin-left:auto;align-self:center;background:none;border:none;color:var(--dim);border-radius:8px;padding:9px 14px;font:inherit;font-size:13px;cursor:pointer;line-height:1.4}
+#langToggle:hover{color:var(--ink);border-color:var(--acc)}
+#loop td:first-child,#loop th:first-child{white-space:nowrap}
+html.theme-light{
+  color-scheme:light;
+  --foreground:#1b1b20; --muted-foreground:#56554f; --background:#f5f4f0; --card:#ffffff;
+  --border:#cfccc3; --accent:#0d6b45;
+}
+body{transition:background-color .25s, color .25s}
+#themeToggle{background:none;border:none;color:var(--dim);border-radius:8px;padding:9px 12px;font:inherit;font-size:14px;cursor:pointer;line-height:1.4}
+#themeToggle:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="#temario"><span class="tr-es">Temario</span><span class="tr-en">Contents</span></a>
+  <a href="#conceptos"><span class="tr-es">Conceptos</span><span class="tr-en">Concepts</span></a>
+  <a href="#loop"><span class="tr-es">El loop</span><span class="tr-en">The loop</span></a>
+  <a href="#setup"><span class="tr-es">Setup ideal</span><span class="tr-en">Ideal setup</span></a>
+  <a href="#estudio"><span class="tr-es">Guía de estudio</span><span class="tr-en">Study guide</span></a>
+  <a href="#lecturas"><span class="tr-es">Lecturas</span><span class="tr-en">Reading</span></a>
+  <a href="#enlaces"><span class="tr-es">Enlaces</span><span class="tr-en">Links</span></a>
+  <a href="#personas"><span class="tr-es">Personas</span><span class="tr-en">People</span></a>
+  <a href="#extras">Extras</a>
+  <button id="langToggle" aria-label="ES/EN">EN</button>
+  <button id="themeToggle" aria-label="light/dark" title="Tema / Theme">☀</button>
+</nav>
+
+<header class="hero">
+    <h1>How to Actually Code with AI</h1>
+  <p class="dim"><span class="tr-es">The NetworkChuck Podcast — NetworkChuck (Zach Starzynski) entrevista a</span><span class="tr-en">The NetworkChuck Podcast — NetworkChuck (Zach Starzynski) interviews</span> <b style="color:var(--ink)">Matt Pocock</b> <span class="tr-es">(creador de Total TypeScript, AI Hero y el repo de skills más starreado del mundo). 2 horas 01 min de podcast grabado en pantalla compartida, con demos en vivo del flujo real de Matt.</span><span class="tr-en">(creator of Total TypeScript, AI Hero and the most-starred skills repo in the world). 2 hours 01 min of podcast recorded over screen share, with live demos of Matt's real workflow.</span></p>
+  <div class="meta">
+    <span>▶ <a href="https://youtu.be/mU8WKII1gpk" target="_blank" rel="noopener">youtu.be/mU8WKII1gpk</a></span><span><span class="tr-es">≈139.7K vistas en ~12 h</span><span class="tr-en">≈139.7K views in ~12 h</span></span><span><span class="tr-es">Duración 2:01:41</span><span class="tr-en">Runtime 2:01:41</span></span><span><span class="tr-es">Fuente: transcripción completa del episodio</span><span class="tr-en">Source: full transcript of the episode</span></span>
+  </div>
+  <div class="stat-grid">
+    <div><b>1</b><span><span class="tr-es">palabra que Matt repitió todo el episodio:</span><span class="tr-en">word Matt repeated all episode:</span> <i>care</i> <span class="tr-es">(importarte el resultado)</span><span class="tr-en">(actually caring about the outcome)</span></span></div>
+    <div><b>150K</b><span><span class="tr-es">tokens: donde Matt se pone nervioso dentro de la context window</span><span class="tr-en">tokens: where Matt gets nervous inside the context window</span></span></div>
+    <div><b>27</b><span><span class="tr-es">skills gratuitas instalables en aihero.dev/skills</span><span class="tr-en">free installable skills at aihero.dev/skills</span></span></div>
+    <div><b>2,500</b><span><span class="tr-es">PRs/mes de Lauren Tan con agentes: el techo de la escalera de confianza</span><span class="tr-en">PRs/month from Lauren Tan with agents: the ceiling of the trust ladder</span></span></div>
+  </div>
+  <p style="margin-top:14px"><span class="tr-es">La tesis del episodio en una línea:</span><span class="tr-en">The episode's thesis in one line:</span> <span class="bigword">care.</span><br>
+  <span class="dim"><span class="tr-es">La IA ya come todo el</span><span class="tr-en">AI already eats all the</span> <i>tactical programming</i><span class="tr-es">; lo estratégico —arquitectura, lenguaje, entorno, verificación— es trabajo tuyo, y la única habilidad que no se puede automatizar todavía es importarte lo que construyes.</span><span class="tr-en">; the strategic part —architecture, language, environment, verification— is your job, and the only skill that can't be automated yet is caring about what you build.</span></span></p>
+</header>
+
+<!-- ============ TEMARIO ============ -->
+<section id="temario">
+  <div class="sec-head"><h2><span class="tr-es">Temario</span><span class="tr-en">Contents</span></h2>
+  <p class="dim"><span class="tr-es">Capítulos oficiales del video con salto directo al minuto.</span><span class="tr-en">Official video chapters, with direct jumps to the minute.</span></p></div>
+
+  <div class="chap"><time>0:00</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk" target="_blank" rel="noopener"><span class="tr-es">¿Hace falta aún aprender un lenguaje de programación?</span><span class="tr-en">Do you still need to learn a programming language?</span></a><small><span class="tr-es">«El software engineering siempre fue más fácil de lo que la gente cree».</span><span class="tr-en">“Software engineering was always easier than people think.”</span></small></div></div>
+  <div class="chap"><time>0:54</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=54s" target="_blank" rel="noopener"><span class="tr-es">Quién es Matt Pocock</span><span class="tr-en">Who Matt Pocock is</span></a><small><span class="tr-es">De voice coach a Vercel, XState, Total TypeScript y «el de las skills».</span><span class="tr-en">From voice coach to Vercel, XState, Total TypeScript and “the skills guy.”</span></small></div></div>
+  <div class="chap"><time>5:03</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=303s" target="_blank" rel="noopener"><span class="tr-es">Programación táctica vs estratégica — y por qué el vibe coding destroza el código</span><span class="tr-en">Tactical vs. strategic programming — and why vibe coding wrecks code</span></a><small><span class="tr-es">El marco de John Ousterhout aplicado a agentes.</span><span class="tr-en">John Ousterhout's framework applied to agents.</span></small></div></div>
+  <div class="chap"><time>12:35</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=755s" target="_blank" rel="noopener"><span class="tr-es">Demo en vivo: Grill with Docs</span><span class="tr-en">Live demo: Grill with Docs</span></a><small><span class="tr-es">Construye un teleprompter para su plataforma de cursos, interrogado por el agente.</span><span class="tr-en">Builds a teleprompter for his course platform, interrogated by the agent.</span></small></div></div>
+  <div class="chap"><time>25:18</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=1518s" target="_blank" rel="noopener"><span class="tr-es">La smart zone y la dumb zone: escribe la spec primero</span><span class="tr-en">The smart zone and the dumb zone: write the spec first</span></a><small><span class="tr-es">Context paranoia, effort levels y la regla de los 150K tokens.</span><span class="tr-en">Context paranoia, effort levels and the 150K-token rule.</span></small></div></div>
+  <div class="chap"><time>34:35</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=2075s" target="_blank" rel="noopener"><span class="tr-es">Sub agents en worktrees, y code review</span><span class="tr-en">Sub agents in worktrees, and code review</span></a><small><span class="tr-es">Orquestador + subagentes paralelos → mega PR; review adversarial.</span><span class="tr-en">Orchestrator + parallel sub agents → mega PR; adversarial review.</span></small></div></div>
+  <div class="chap"><time>44:52</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=2692s" target="_blank" rel="noopener"><span class="tr-es">La escalera de confianza: tests, tipos y feedback loops</span><span class="tr-en">The trust ladder: tests, types and feedback loops</span></a><small><span class="tr-es">Cómo escalar de revisar todo a fusionar sin leer el diff.</span><span class="tr-en">How to go from reviewing everything to merging without reading the diff.</span></small></div></div>
+  <div class="chap"><time>52:31</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=3151s" target="_blank" rel="noopener"><span class="tr-es">El starter stack y los deep modules</span><span class="tr-en">The starter stack and deep modules</span></a><small><span class="tr-es">Lo mínimo para empezar + testing de módulos profundos.</span><span class="tr-en">The bare minimum to start + testing deep modules.</span></small></div></div>
+  <div class="chap"><time>1:01:01</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=3661s" target="_blank" rel="noopener"><span class="tr-es">Mejorar la arquitectura del codebase, en vivo</span><span class="tr-en">Improving codebase architecture, live</span></a><small><span class="tr-es">La skill</span><span class="tr-en">The</span> <code>improve-codebase-architecture</code> <span class="tr-es">y el cron job diario.</span><span class="tr-en">skill and the daily cron job.</span></small></div></div>
+  <div class="chap"><time>1:08:15</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=4095s" target="_blank" rel="noopener"><span class="tr-es">Lo que todavía necesitas aprender</span><span class="tr-en">What you still need to learn</span></a><small><span class="tr-es">Estrategia «enough to be dangerous» y léxico de dominio.</span><span class="tr-en">The “enough to be dangerous” strategy and domain lexicon.</span></small></div></div>
+  <div class="chap"><time>1:14:11</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=4451s" target="_blank" rel="noopener"><span class="tr-es">Dónde hostear tu app y desplegar con seguridad</span><span class="tr-en">Where to host your app and deploy safely</span></a><small><span class="tr-es">Postgres gestionado, Vercel/Netlify, Cloudflare, determinismo.</span><span class="tr-en">Managed Postgres, Vercel/Netlify, Cloudflare, determinism.</span></small></div></div>
+  <div class="chap"><time>1:26:38</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=5198s" target="_blank" rel="noopener"><span class="tr-es">Open source en la era de los slop PRs</span><span class="tr-en">Open source in the era of slop PRs</span></a><small><span class="tr-es">Por qué Hono cerró los PRs y la era del issue de calidad.</span><span class="tr-en">Why Hono closed PRs and the era of the quality issue.</span></small></div></div>
+  <div class="chap"><time>1:34:41</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=5681s" target="_blank" rel="noopener"><span class="tr-es">Consejos para nuevos devs: escuela, títulos, contratación</span><span class="tr-en">Advice for new devs: school, degrees, hiring</span></a><small><span class="tr-es">Proyectos publicados > certificados; los clásicos en papel.</span><span class="tr-en">Published projects > certificates; the classics on paper.</span></small></div></div>
+  <div class="chap"><time>1:44:39</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=6279s" target="_blank" rel="noopener"><span class="tr-es">Software factories y el editor de video de IA de Matt</span><span class="tr-en">Software factories and Matt's AI video editor</span></a><small><span class="tr-es">2,500 commits de</span><span class="tr-en">2,500 commits of</span> <code>course video manager</code> <span class="tr-es">y loop engineering.</span><span class="tr-en">and loop engineering.</span></small></div></div>
+  <div class="chap"><time>1:56:49</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=7009s" target="_blank" rel="noopener"><span class="tr-es">Agentes para tu vida</span><span class="tr-en">Agents for your life</span></a><small><span class="tr-es">Standups diarios, dictado desde el reloj, wikis del público.</span><span class="tr-en">Daily standups, dictation from your watch, audience wikis.</span></small></div></div>
+  <div class="chap"><time>2:01:01</time><div><a href="https://www.youtube.com/watch?v=mU8WKII1gpk&t=7261s" target="_blank" rel="noopener"><span class="tr-es">Una oración para ti</span><span class="tr-en">One sentence for you</span></a><small><span class="tr-es">El cierre característico de NetworkChuck.</span><span class="tr-en">NetworkChuck's signature sign-off.</span></small></div></div>
+</section>
+
+<!-- ============ CONCEPTOS ============ -->
+<section id="conceptos">
+  <div class="sec-head"><h2><span class="tr-es">Contenido: conceptos, teoría y tips</span><span class="tr-en">Content: concepts, theory and tips</span></h2>
+  <p class="dim"><span class="tr-es">Todo el andamiaje conceptual del episodio, con minutos de referencia. Toca cada tarjeta para desplegarla.</span><span class="tr-en">All the conceptual scaffolding of the episode, with reference minutes. Tap each card to expand it.</span></p></div>
+
+  <div class="group-label"><span class="tr-es">Fundamentos</span><span class="tr-en">Foundations</span></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t">Tactical vs. strategic programming</span><span><span class="m">5:03</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">De</span><span class="tr-en">From</span> <i>A Philosophy of Software Design</i> <span class="tr-es">(Ousterhout): lo táctico es el sargento que gana la batalla (resolver el problema de hoy); lo estratégico es el general que gana la guerra (la visión a largo plazo del codebase). «La IA es buenísima en lo táctico y</span><span class="tr-en">(Ousterhout): the tactical is the sergeant who wins the battle (solve today's problem); the strategic is the general who wins the war (the codebase's long-term vision). “AI is great at the tactical and</span> <b>garbage</b> <span class="tr-es">en lo estratégico». Falla en estrategia porque se entrena y evalúa por tarea — pensar a largo plazo no mejora sus scores — y porque los errores estratégicos no se notan hasta ~9 meses después.</span><span class="tr-en">at the strategic.” It fails at strategy because it's trained and evaluated per task — long-term thinking doesn't improve its scores — and because strategic mistakes aren't noticed until ~9 months later.</span>
+  <div class="quote"><span class="tr-es">"AI is really good at tactical programming and terrible at strategic programming. It's just garbage at it."</span><span class="tr-en">“AI is really good at tactical programming and terrible at strategic programming. It's just garbage at it.”</span><small><span class="tr-es">— Matt Pocock, 5:20 aprox.</span><span class="tr-en">— Matt Pocock, ~5:20</span></small></div></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">La crítica al vibe coding (y el meme del perro en la casa en llamas)</span><span class="tr-en">The critique of vibe coding (and the dog-in-a-burning-house meme)</span></span><span><span class="m">7:08</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Definición original de vibe coding: programar sin mirar el código, tratándolo como artefacto que da igual. Como método único «nunca ha funcionado»: el agente táctico solo resuelve el problema actual y el código se degrada progresivamente. El código es el</span><span class="tr-en">The original definition of vibe coding: programming without looking at the code, treating it as an artifact you couldn't care less about. As a sole method it “has never worked”: the tactical agent only solves the current problem and the code degrades progressively. Code is the</span> <b><span class="tr-es">entorno donde opera el agente</span><span class="tr-en">environment the agent operates in</span></b><span class="tr-es">; si empeora, el agente empeora — y mira pasar el incendio «como el perro del meme con la casa ardiendo». Hoy el humano es quien mantiene la casa en orden. Nota lingüística de Matt: «semantic diffusion» — términos como</span><span class="tr-en">; if it gets worse, the agent gets worse — and watches the fire go by “like the meme dog with the house burning”. Today the human is the one keeping the house in order. Matt's linguistic note: “semantic diffusion” — terms like</span> <i>vibe coding</i> <span class="tr-es">ya significan cinco cosas distintas.</span><span class="tr-en">already mean five different things.</span>
+  <div class="quote"><span class="tr-es">"vibe coding… I don't think has ever worked if it's the only thing you do."</span><span class="tr-en">“vibe coding… I don't think has ever worked if it's the only thing you do.”</span><small>— Matt Pocock, 7:23</small></div></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">El factor</span><span class="tr-en">The</span> <i>care</i><span class="tr-es">: la habilidad no automatizable</span><span class="tr-en"> factor: the un-automatable skill</span></span><span><span class="m">10:45</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">«El programming estratégico es, en gran medida, preocuparte un poco más que la persona de al lado». Es 'ridículo' seguir haciendo tú el trabajo táctico ahora que cuesta «menos que el salario mínimo» por ejecución; tu tiempo debe ir a calidad, arquitectura y velocidad. Los expertos sacan más de los modelos porque</span><span class="tr-en">“Strategic programming is, to a large extent, caring a bit more than the person next to you.” It's 'ridiculous' to keep doing the tactical work yourself now that it costs “less than minimum wage” per run; your time should go to quality, architecture and speed. Experts get more out of the models because</span> <b><span class="tr-es">les importan cosas concretas y tienen el lenguaje para pedirlas</span><span class="tr-en">they care about concrete things and have the language to ask for them</span></b>.
+  <div class="quote"><span class="tr-es">"So much of strategic programming is just caring a bit more than the person next to you."</span><span class="tr-en">“So much of strategic programming is just caring a bit more than the person next to you.”</span><small>— Matt Pocock, 11:09</small></div></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">La bitter lesson, honestamente enmarcada</span><span class="tr-en">The bitter lesson, honestly framed</span></span><span><span class="m">72:49</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Matt admite que la bitter lesson dice que toda esta arquitectura y estos «straightjackets» serán barridos por modelos más inteligentes. Pero «no soy adivino, vivo en el Oxfordshire rural, no en Silicon Valley»: su trabajo es decir qué funciona</span><span class="tr-en">Matt admits the bitter lesson says all this architecture and these “straightjackets” will be swept away by smarter models. But “I'm not a fortune teller, I live in rural Oxfordshire, not Silicon Valley”: his job is to say what works</span> <b><span class="tr-es">hoy</span><span class="tr-en">today</span></b><span class="tr-es">, y hoy esto es el state-of-the-art. Además sospecha que «hacer que les importe» podrá resolverse en el harness sin cambiar el modelo.</span><span class="tr-en">, and today this is the state-of-the-art. He also suspects “making them care” could be solved in the harness without changing the model.</span></div></div>
+
+  <div class="group-label"><span class="tr-es">Comunicación y contexto</span><span class="tr-en">Communication and context</span></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">Communication gap: el agente como el tipo de</span><span class="tr-en">Communication gap: the agent as the guy from</span> <i>Memento</i></span><span><span class="m">17:00</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Cada sesión es un desarrollador nuevo «caído en el mundo sin memoria alguna». La brecha de comunicación</span><span class="tr-en">Each session is a new developer “dropped into the world with no memory whatsoever”. The communication gap</span> <b><span class="tr-es">no desaparece cuando el modelo es más inteligente — el problema es el humano</span><span class="tr-en">doesn't disappear when the model is smarter — the problem is the human</span></b><span class="tr-es">, que asume que el agente entendió su prompt de una línea. Obligar al agente a interrogarte antes de construir produce «el resultado que quieres, no el que esperas a ciegas».</span><span class="tr-en">, who assumes the agent understood their one-line prompt. Forcing the agent to interrogate you before building produces “the result you want, not the one you blindly end up waiting for”.</span>
+  <div class="quote"><span class="tr-es">"The agent is just like a developer you're hiring… dropped into this world like the guy from Memento, with no memory whatsoever."</span><span class="tr-en">“The agent is just like a developer you're hiring… dropped into this world like the guy from Memento, with no memory whatsoever.”</span><small>— Matt Pocock, 17:12</small></div></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">Glossary + Domain-Driven Design: un lenguaje compartido</span><span class="tr-en">Glossary + Domain-Driven Design: a shared language</span></span><span><span class="m">15:11 · 20:18</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Aplicación práctica de la</span><span class="tr-en">A practical application of Eric Evans's</span> <i>ubiquitous language</i> <span class="tr-es">de Eric Evans: un archivo</span><span class="tr-en"> a</span> <code>glossary</code> <span class="tr-es">con las entidades de tu dominio (en el demo: courses, sections, course versions, lessons, draft/pending versions) construido</span><span class="tr-en">file with your domain entities (in the demo: courses, sections, course versions, lessons, draft/pending versions) built</span> <b><span class="tr-es">dejadamente por el agente</span><span class="tr-en">lazily by the agent</span></b> <span class="tr-es">mientras grillean — el agente «acuña» términos en los hot spots y ofrece alinear el código. Resultado: specs, código, BD y frontend hablan la misma lengua; el agente es menos verboso y más preciso. Consejo anti-fricción: no lo escribas a mano de antemano, empieza a grillar y deja que emerja.</span><span class="tr-en">while you grill — the agent “coins” terms in the hot spots and offers to align the code. Result: specs, code, DB and frontend speak the same language; the agent is less verbose and more precise. Anti-friction tip: don't write it by hand upfront, start grilling and let it emerge.</span>
+  <div class="quote"><span class="tr-es">"if you use a shared language, it just feels like the agent is in your brain."</span><span class="tr-en">“if you use a shared language, it just feels like the agent is in your brain.”</span><small>— Matt Pocock, 22:44</small></div></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">ADRs: la memoria del codebase que el código no puede tener</span><span class="tr-en">ADRs: the codebase memory that code itself can't hold</span></span><span><span class="m">20:29</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Archivos markdown numerados en</span><span class="tr-en">Numbered markdown files in</span> <code>docs/adr/</code> <span class="tr-es">que documentan decisiones difíciles de revertir y su contexto. El código solo documenta el presente; los ADRs preservan el pasado — sin ellos el agente repite los mismos errores «una y otra vez». Las skills consultan el glosario</span><span class="tr-en">documenting hard-to-reverse decisions and their context. Code only documents the present; ADRs preserve the past — without them the agent repeats the same mistakes “over and over”. The skills consult the glossary</span> <i><span class="tr-es">y</span><span class="tr-en">and</span></i> <span class="tr-es">los ADRs antes de proponer nada.</span><span class="tr-en">the ADRs before proposing anything.</span></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">Smart zone / dumb zone: la context paranoia</span><span class="tr-en">Smart zone / dumb zone: context paranoia</span></span><span><span class="m">25:56 · 28:59</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Idea de Dex Horthy: dentro de la ventana de 1M tokens hay una zona inteligente y una tonta — al acumular tokens las relaciones crecen cuadráticamente y hay «crazy attention degradation». Matt se pone nervioso cerca de los</span><span class="tr-en">An idea by Dex Horthy: inside the 1M-token window there's a smart zone and a dumb zone — as tokens pile up, relationships grow quadratically and you get “crazy attention degradation”. Matt gets nervous near</span> <b>150K tokens</b><span class="tr-es">; el número exacto da igual, lo que entrenas es el instinto. Corolario: contextos pequeños = más inteligente, más barato, menos latencia. Y la navegabilidad importa más que el tamaño: «lo que agota el contexto son codebases difíciles de navegar, no codebases grandes».</span><span class="tr-en">; the exact number doesn't matter, what you train is the instinct. Corollary: small contexts = smarter, cheaper, less latency. And navigability matters more than size: “what exhausts context is hard-to-navigate codebases, not big codebases”.</span></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">Effort levels: la epidemia de effort demasiado alto</span><span class="tr-en">Effort levels: the too-high-effort epidemic</span></span><span><span class="m">30:13 · 32:07</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">«Most folks are using way too high effort». Su default:</span><span class="tr-en">“Most folks are using way too high effort”. His default:</span> <b><span class="tr-es">Opus 5.5 en medium</span><span class="tr-en">Opus 5.5 on medium</span></b> <span class="tr-es">para prácticamente todo (quizá pronto low). Para explorar no sirve más effort: solo hay que leer los archivos correctos. Effort alto quema tokens y acelera la entrada a la dumb zone. Solo lo sube para tres cosas: research web difícil de navegar, performance testing y debugging donde el agente no debe rendirse temprano.</span><span class="tr-en">for practically everything (soon low, maybe). More effort doesn't help exploration: you just need to read the right files. High effort burns tokens and speeds up entry into the dumb zone. He only raises it for three things: web research that's hard to navigate, performance testing, and debugging where the agent must not give up early.</span></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">Mantén el modelo estático, arregla tu entorno</span><span class="tr-en">Keep the model static, fix your environment</span></span><span><span class="m">33:23</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Filosofía contrarian central del episodio: no hacer min-max de modelos ni esperar al próximo. Con glosario, ADRs, standards y un codebase navegable, hay «so much low-hanging fruit» que la gente subestima.</span><span class="tr-en">The episode's core contrarian philosophy: no model min-maxing, no waiting for the next one. With a glossary, ADRs, standards and a navigable codebase, there's “so much low-hanging fruit” that people underestimate.</span>
+  <div class="quote"><span class="tr-es">"instead of waiting for the next model to fix all your problems, why not just fix all your problems?"</span><span class="tr-en">“instead of waiting for the next model to fix all your problems, why not just fix all your problems?”</span><small>— Matt Pocock, 33:50</small></div></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">Dictado por voz como interfaz</span><span class="tr-en">Voice dictation as an interface</span></span><span><span class="m">16:14</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Matt dicta con Whisper Flow («if you're not dictating, you're just going way too slow, basically»). Patrón complementario (115:34): para planning denso, desconectarse a papel y boli a «human speed» y luego volcar todo al agente por dictado.</span><span class="tr-en">Matt dictates with Whisper Flow (“if you're not dictating, you're just going way too slow, basically”). Complementary pattern (115:34): for dense planning, unplug to pen and paper at “human speed”, then dump everything into the agent by dictation.</span></div></div>
+
+  <div class="group-label"><span class="tr-es">Calidad y confianza</span><span class="tr-en">Quality and trust</span></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">La escalera de confianza (trust ladder, de Lauren Tan)</span><span class="tr-en">The trust ladder (from Lauren Tan)</span></span><span><span class="m">45:12</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">La confianza se escala por peldaños: sin entorno de verificación revisas todo a mano y no pasas de ~4 agentes en paralelo; con checks fuertes, evidencia en cada PR y entorno restrictivo, llegas a mergear sin revisar y correr cientos. Lauren Tan lo demostró con ~2,500 PRs/mes en Cursor. En dominios críticos (medicina, finanzas) no se aplica sampling: ahí se queman tokens en verificación de seguridad.</span><span class="tr-en">Trust is climbed rung by rung: with no verification environment you review everything by hand and don't get past ~4 agents in parallel; with strong checks, evidence on every PR and a restrictive environment, you get to merging without reviewing and running hundreds. Lauren Tan proved it with ~2,500 PRs/month at Cursor. In critical domains (medicine, finance) sampling doesn't apply: there you burn tokens on security verification.</span></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">Automated checks: tipos, tests, linters, y la guerra contra</span><span class="tr-en">Automated checks: types, tests, linters, and the war on</span> <code>any</code></span><span><span class="m">48:57</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">TypeScript estricto sobre JavaScript porque «los tipos le dicen al agente sus errores casi al instante». Prohibir</span><span class="tr-en">Strict TypeScript over JavaScript because “types tell the agent its mistakes almost instantly”. Ban</span> <code>any</code> <span class="tr-es">en los standards: es hacer trampa contra el type checker (el ejemplo del video: un</span><span class="tr-en">in the standards: it's cheating the type checker (the video's example: a</span> <code>ManagedRuntime&lt;any, any&gt;</code> <span class="tr-es">que dejaba compilar un servicio no provisto en 111 módulos → 500 en runtime). Truco: dile «find me harsh lint rules» — los agentes son buenos encontrando reglas que los restrinjan y acelerando sus propios tests. Cada hallazgo de retro debe cristalizar en un check determinista (el «ratchet»).</span><span class="tr-en">that let an unprovided service compile across 111 modules → 500 at runtime). Trick: tell it “find me harsh lint rules” — agents are good at finding rules that constrain them and speeding up their own tests. Every retro finding must crystallize into a deterministic check (the “ratchet”).</span></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">Deep modules y feedback loops</span><span class="tr-en">Deep modules and feedback loops</span></span><span><span class="m">46:59 · 55:45</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Ousterhout otra vez: bloques grandes con implementación oculta tras una interface estrecha. Testea desde el entry point, no línea por línea: puedes «apagar la luz» del módulo, reestructurar todo el interior y los tests siguen valiendo (anti-patrón: el test que solo repite «un tweet admite 240 caracteres» → churn infinito). El codebase necesita feedback loops suficientes para que el agente se</span><span class="tr-en">Ousterhout again: big blocks with a hidden implementation behind a narrow interface. Test from the entry point, not line by line: you can “turn the lights off” on the module, restructure the whole interior and the tests still hold (anti-pattern: the test that just repeats “a tweet allows 240 characters” → infinite churn). The codebase needs enough feedback loops for the agent to</span> <b><span class="tr-es">auto-grade</span><span class="tr-en">self-grade</span></b><span class="tr-es">: que haga clics en la app real, tracee performance y verifique solo. Con eso, el effort alto va en la fase de verificación.</span><span class="tr-en">: clicking around the real app, tracing performance and verifying on its own. With that, the high effort goes into the verification phase.</span></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">Locality: la métrica de arquitectura que importa</span><span class="tr-en">Locality: the architecture metric that matters</span></span><span><span class="m">70:13</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Si cambias algo, ¿se quedan todos los cambios en el mismo sitio (un archivo o dos)? Alta locality = código relacionado junto. Los términos de las skills de Matt (deep module, seam, locality…) apuntan deliberadamente a los libros clásicos para que la skill</span><span class="tr-en">If you change something, do all the changes stay in one place (one or two files)? High locality = related code together. The terms in Matt's skills (deep module, seam, locality…) deliberately point to the classic books so the</span> <code>teach</code> <span class="tr-es">pueda explicarlos con referencia bibliográfica.</span><span class="tr-en">skill can explain them with a bibliographic reference.</span></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t">Always choose determinism</span><span><span class="m">85:10</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Regla transversal: ante la disyuntiva determinista/no determinista, siempre determinista. CI/CD en vez de que el agente despliegue a mano; una lint rule en vez de una regla subjetiva de review. El determinismo cuesta recursos baratos (compute) en vez de tokens caros, hace lo mismo siempre, y si algo se rompe el agente entra a arreglarlo.</span><span class="tr-en">A cross-cutting rule: faced with the deterministic/non-deterministic choice, always deterministic. CI/CD instead of the agent deploying by hand; a lint rule instead of a subjective review rule. Determinism costs cheap resources (compute) instead of expensive tokens, does the same thing every time, and if something breaks the agent steps in to fix it.</span>
+  <div class="quote"><span class="tr-es">"always choose determinism when you have a choice."</span><span class="tr-en">“always choose determinism when you have a choice.”</span><small>— Matt Pocock, 85:55</small></div></div></div>
+
+  <div class="group-label"><span class="tr-es">Proceso y panorama</span><span class="tr-en">Process and big picture</span></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t">Software factory = loop engineering</span><span><span class="m">104:41 · 107:06</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Producir software tiene puntos donde un humano toca algo (iniciar el trabajo, aprobar el plan, merge). La software factory saca al humano de más puntos: triggers (un issue nuevo o un warning de BD pingan a un agente que decide si actuar), cron jobs que mejoran el entorno solos. Definida en su AI Coding Dictionary. Advertencia: con más aceleración hacen falta</span><span class="tr-en">Producing software has points where a human touches something (starting the work, approving the plan, merge). The software factory removes the human from more of those points: triggers (a new issue or a DB warning pings an agent that decides whether to act), cron jobs that improve the environment on their own. Defined in his AI Coding Dictionary. Warning: more acceleration requires</span> <b><span class="tr-es">frenos</span><span class="tr-en">brakes</span></b> <span class="tr-es">— one-way/two-way doors y sampling — «para que no se convierta en un slop cannon».</span><span class="tr-en">— one-way/two-way doors and sampling — “so it doesn't just become a slop cannon”.</span>
+  <div class="quote"><span class="tr-es">"you need to be able to pull the software factory back so it doesn't just become a slop cannon."</span><span class="tr-en">“you need to be able to pull the software factory back so it doesn't just become a slop cannon.”</span><small>— Matt Pocock, ~107:00</small></div></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">Slop PRs: el fin del drive-by contributing</span><span class="tr-en">Slop PRs: the end of drive-by contributing</span></span><span><span class="m">88:52</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Con la IA es ridículamente fácil mandar un PR basura a cualquier repo, así que proyectos como Hono ya solo aceptan PRs de colaboradores (Matt cerró los de su repo de skills). Contribuir hoy =</span><span class="tr-en">With AI it's ridiculously easy to send a garbage PR to any repo, so projects like Hono now only accept PRs from collaborators (Matt closed them on his skills repo). Contributing today =</span> <b><span class="tr-es">issues con evidencia y repros de calidad</span><span class="tr-en">issues with evidence and quality repros</span></b><span class="tr-es">: el maintainer puede convertirlos en PRs con agentes. Bonus: «teach me about this codebase» — apunta tu agente a un repo popular y aprende de él. Y publicar un paquete npm es más simple de lo que parece: changesets + GitHub Actions.</span><span class="tr-en">: the maintainer can turn them into PRs with agents. Bonus: “teach me about this codebase” — point your agent at a popular repo and learn from it. And publishing an npm package is simpler than it looks: changesets + GitHub Actions.</span></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">Knowledge work es más difícil que code para la IA</span><span class="tr-en">Knowledge work is harder than code for AI</span></span><span><span class="m">118:13</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">El código es verificable (tests, checks, todo texto), por eso los agentes dominan code y mates. El trabajo de conocimiento —planear un curso, un guion— no tiene forma de verificarse, «way harder than people think»: es el mismo motivo por el que los modelos aún no dibujan manos ni escriben tweets indistinguibles.</span><span class="tr-en">Code is verifiable (tests, checks, all text), which is why agents dominate code and math. Knowledge work —planning a course, a script— has no way to be verified, “way harder than people think”: the same reason models still can't draw hands or write indistinguishable tweets.</span></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">El editor de video como software factory personal</span><span class="tr-en">The video editor as a personal software factory</span></span><span><span class="m">108:26</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><code>course-video-manager</code><span class="tr-es">: repo open source de Matt, 2,500 commits — el que aparecía en tus capturas con los ADRs. Corta mientras graba (dejas un hueco → se transcribe → aparece como clip), playground de diagramas enlazados a clips, teleprompter estilo Elgato, guiones y animatics escritos por agentes, previsualización del video antes de grabarlo, sync de cada corte a su plataforma de cursos. Solo lectura: sin PRs ni issues. NetworkChuck describió su pipeline paralelo: «offload it, ingest it» + Gemini video API para «ver» el video + un frame.io propio + XML para Adobe Premiere.</span><span class="tr-en">: Matt's open source repo, 2,500 commits — the one that showed up in your screenshots with the ADRs. Cuts while he records (you leave a gap → it gets transcribed → it shows up as a clip), a playground of diagrams linked to clips, an Elgato-style teleprompter, scripts and animatics written by agents, a preview of the video before recording it, sync of every cut to his course platform. Read-only: no PRs or issues. NetworkChuck described his parallel pipeline: “offload it, ingest it” + the Gemini video API to “watch” the video + his own frame.io + XML for Adobe Premiere.</span></div></div>
+
+  <div class="acc"><button class="acc-btn"><span class="t"><span class="tr-es">Agentes para la vida personal</span><span class="tr-en">Agents for personal life</span></span><span><span class="m">112:43 · 116:54</span> <span class="chev">▸</span></span></button>
+  <div class="acc-body"><span class="tr-es">Matt: daily standup con sus agentes («what tasks need to be done today?»), dictado desde un Pixel Watch a un to-do con triage de agentes, dos dispositivos de terminal físicos por la casa, y un «wiki del público» estilo Karpathy: repo privado donde un cron cada ~3 h ingiere tweets, Discord, Slack y Gmail de su audiencia — puede preguntar «¿qué quieren aprender?» y derivar learning goals. Autocrítica: «it's a me problem, not an agent problem» — le falta la interfaz correcta.</span><span class="tr-en">Matt: daily standup with his agents (“what tasks need to be done today?”), dictation from a Pixel Watch into a to-do with agent triage, two physical terminal devices around the house, and a Karpathy-style “audience wiki”: a private repo where a cron every ~3 h ingests tweets, Discord, Slack and Gmail from his audience — he can ask “what does my audience want to learn?” and derive learning goals from it. Self-critique: “it's a me problem, not an agent problem” — he's still missing the right interface.</span></div></div>
+</section>
+
+<!-- ============ LOOP ============ -->
+<section id="loop">
+  <div class="sec-head"><h2><span class="tr-es">El loop de Matt, de punta a punta</span><span class="tr-en">Matt's loop, end to end</span></h2>
+  <p class="dim"><span class="tr-es">Grill → spec → tickets → sub agents en worktrees → review → merge danger → merge → retro → (mejora del entorno que alimenta el próximo ciclo).</span><span class="tr-en">Grill → spec → tickets → sub agents in worktrees → review → merge danger → merge → retro → (environment improvements that feed the next cycle).</span></p></div>
+
+  <div class="fig">
+    <svg viewBox="0 0 920 476" role="img" aria-label="Diagrama del flujo de trabajo">
+    <style>
+  .bx{fill:color-mix(in srgb, var(--foreground, #fff) 4%, transparent); stroke:var(--border, #3a3a44); stroke-width:1.2}
+  .hl{fill:color-mix(in srgb, var(--accent, #7fd8a8) 9%, transparent); stroke:var(--accent, #7fd8a8); stroke-width:1.5}
+  .env{fill:color-mix(in srgb, var(--accent, #7fd8a8) 7%, transparent); stroke:var(--accent, #7fd8a8); stroke-width:1.2; stroke-dasharray:5 4}
+  .lb{fill:var(--foreground, #e8e6e2); font-weight:600; font-size:13px}
+  .sb{fill:var(--muted-foreground, #9a968f); font-size:12px}
+  .ab{fill:var(--accent, #7fd8a8); font-weight:600; font-size:12px}
+  .nb{fill:color-mix(in srgb, var(--accent, #7fd8a8) 16%, transparent); stroke:var(--accent, #7fd8a8); stroke-width:1}
+  .num{fill:var(--accent, #7fd8a8); font-size:12px; font-weight:700}
+  .ln{fill:none; stroke:var(--muted-foreground, #9a968f); stroke-width:1.3; marker-end:url(#ar)}
+  .lna{fill:none; stroke:var(--accent, #7fd8a8); stroke-width:1.6; marker-end:url(#ara)}
+  .lnd{fill:none; stroke:var(--muted-foreground, #9a968f); stroke-width:1.2; stroke-dasharray:3 4}
+  .pill{fill:color-mix(in srgb, var(--accent, #7fd8a8) 12%, transparent); stroke:var(--accent, #7fd8a8); stroke-width:1.4}
+  .step{fill:color-mix(in srgb, var(--accent, #7fd8a8) 6%, transparent); stroke:var(--border, #3a3a44); stroke-width:1.2}
+  .steptop{fill:color-mix(in srgb, var(--accent, #7fd8a8) 14%, transparent); stroke:var(--accent, #7fd8a8); stroke-width:1.4}
+  .base{stroke:var(--border, #3a3a44); stroke-width:1.2}
+</style>
+<defs>
+  <marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--muted-foreground, #9a968f)"/></marker>
+  <marker id="ara" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--accent, #7fd8a8)"/></marker>
+</defs>
+    <!-- entorno -->
+    <rect x="14" y="12" width="868" height="64" rx="10" class="env"/>
+    <text x="32" y="36" class="ab"><tspan class="tr-es">EL ENTORNO — lo que arreglas tú, no el modelo</tspan><tspan class="tr-en">THE ENVIRONMENT — what you fix, not the model</tspan></text>
+    <text x="32" y="57" class="sb"><tspan class="tr-es">glossary (lenguaje compartido) · docs/adr/*.md · coding-standards.md · automated checks (tipos, tests, lint) · codebase navegable</tspan><tspan class="tr-en">glossary (shared language) · docs/adr/*.md · coding-standards.md · automated checks (types, tests, lint) · navigable codebase</tspan></text>
+    <path class="ln" style="stroke-dasharray:3 4" d="M105 76 V108"/>
+    <path class="ln" style="stroke-dasharray:3 4" d="M323 76 V108"/>
+    <path class="ln" style="stroke-dasharray:3 4" d="M543 76 V108"/>
+    <path class="ln" style="stroke-dasharray:3 4" d="M787 76 V108"/>
+    <text x="130" y="97" class="sb"><tspan class="tr-es">todos los pasos leen el entorno</tspan><tspan class="tr-en">every step reads the environment</tspan></text>    <!-- fila 1 -->
+    <rect x="14" y="112" width="182" height="74" rx="9" class="bx"/><circle cx="34" cy="132" r="11" class="nb"/><text x="34" y="136" text-anchor="middle" class="num">1</text><text x="56" y="137" class="lb">grill-with-docs</text><text x="26" y="159" class="sb"><tspan class="tr-es">el agente te interroga</tspan><tspan class="tr-en">the agent interrogates you</tspan></text><text x="26" y="175" class="sb"><tspan class="tr-es">antes de escribir código</tspan><tspan class="tr-en">before writing code</tspan></text>
+    <path class="lna" d="M196 149 H228"/>
+    <rect x="232" y="112" width="182" height="74" rx="9" class="bx"/><circle cx="252" cy="132" r="11" class="nb"/><text x="252" y="136" text-anchor="middle" class="num">2</text><text x="274" y="137" class="lb"><tspan class="tr-es">decisión de tamaño</tspan><tspan class="tr-en">size decision</tspan></text><text x="244" y="159" class="sb"><tspan class="tr-es">pequeño → implement ·</tspan><tspan class="tr-en">small → implement ·</tspan></text><text x="244" y="175" class="sb"><tspan class="tr-es">grande (&gt;150K tok) → spec</tspan><tspan class="tr-en">big (&gt;150K tok) → spec</tspan></text>
+    <path class="ln" d="M414 149 H448"/>
+    <rect x="452" y="112" width="182" height="74" rx="9" class="bx"/><circle cx="472" cy="132" r="11" class="nb"/><text x="472" y="136" text-anchor="middle" class="num">3</text><text x="494" y="137" class="lb">to-spec</text><text x="464" y="159" class="sb"><tspan class="tr-es">markdown o issue de GitHub;</tspan><tspan class="tr-en">markdown or GitHub issue;</tspan></text><text x="464" y="175" class="sb"><tspan class="tr-es">los tickets son sub-issues</tspan><tspan class="tr-en">tickets are sub-issues</tspan></text>
+    <path class="ln" d="M634 149 H664"/>
+    <rect x="668" y="112" width="214" height="74" rx="9" class="bx"/><circle cx="688" cy="132" r="11" class="nb"/><text x="688" y="136" text-anchor="middle" class="num">4</text><text x="710" y="137" class="lb">implement-spec</text><text x="680" y="159" class="sb"><tspan class="tr-es">orquestador + sub agents en</tspan><tspan class="tr-en">orchestrator + sub agents in</tspan></text><text x="680" y="175" class="sb"><tspan class="tr-es">paralelo, 1/worktree → mega PR</tspan><tspan class="tr-en">parallel, 1/worktree → mega PR</tspan></text>
+    <!-- fila 2 -->
+    <path class="ln" d="M775 186 V222"/>
+    <rect x="668" y="226" width="214" height="74" rx="9" class="bx"/><circle cx="688" cy="246" r="11" class="nb"/><text x="688" y="250" text-anchor="middle" class="num">5</text><text x="710" y="251" class="lb">code-review</text><text x="680" y="273" class="sb">adversarial: spec review +</text><text x="680" y="289" class="sb"><tspan class="tr-es">coding-standards + seguridad</tspan><tspan class="tr-en">coding-standards + security</tspan></text>
+    <path class="ln" d="M668 263 H606"/>
+    <rect x="386" y="226" width="216" height="74" rx="9" class="bx"/><circle cx="406" cy="246" r="11" class="nb"/><text x="406" y="250" text-anchor="middle" class="num">6</text><text x="428" y="251" class="lb">pr / merge danger</text><text x="398" y="273" class="sb"><tspan class="tr-es">summary visual + evidencia +</tspan><tspan class="tr-en">visual summary + evidence +</tspan></text><text x="398" y="289" class="sb">one/two-way door · blast radius</text>
+    <path class="ln" d="M386 263 H350"/>
+    <rect x="152" y="226" width="194" height="74" rx="9" class="bx"/><circle cx="172" cy="246" r="11" class="nb"/><text x="172" y="250" text-anchor="middle" class="num">7</text><text x="194" y="251" class="lb">human review</text><text x="164" y="273" class="sb"><tspan class="tr-es">two-way + radio chico → ni mirar;</tspan><tspan class="tr-en">two-way + small radius → skip;</tspan></text><text x="164" y="289" class="sb"><tspan class="tr-es">one-way → «trying to break it»</tspan><tspan class="tr-en">one-way → “trying to break it”</tspan></text>
+    <path class="ln" d="M152 263 H118"/>
+    <rect x="14" y="243" width="100" height="40" rx="20" class="pill"/><text x="64" y="268" text-anchor="middle" class="lb">merge</text>
+    <!-- retro -->
+    <path class="ln" d="M64 283 V362 H166"/>
+    <rect x="170" y="328" width="250" height="68" rx="9" class="hl"/><circle cx="190" cy="348" r="11" class="nb"/><text x="190" y="352" text-anchor="middle" class="num">8</text><text x="212" y="353" class="lb">retro</text><text x="182" y="375" class="sb"><tspan class="tr-es">sesión + PR + comentarios → mejoras</tspan><tspan class="tr-en">session + PR + comments → upgrades</tspan></text><text x="182" y="391" class="sb"><tspan class="tr-es">al entorno</tspan><tspan class="tr-en">to the environment</tspan></text>
+    <path class="lna" d="M420 362 H912 V44 H884"/>
+    <text x="436" y="352" class="ab"><tspan class="tr-es">el loop se auto-mejora: nunca volver a escribir el mismo comentario</tspan><tspan class="tr-en">the loop self-improves: never write the same comment twice</tspan></text>
+    <!-- leyenda -->
+    <rect x="14" y="412" width="892" height="44" rx="8" class="bx"/>
+    <text x="30" y="430" class="sb"><tspan class="tr-es">Esfuerzo humano: alto al inicio (todo se revisa) → baja a sampling 1 de 5 al subir la escalera de confianza.</tspan><tspan class="tr-en">Human effort: high at the start (everything is reviewed) → drops to 1-in-5 sampling as you climb the trust ladder.</tspan></text>
+    <text x="30" y="448" class="sb"><tspan class="tr-es">Modelo fijo (Opus 5.5 · effort medium) en todos los pasos; effort alto solo en research web, performance testing y debugging.</tspan><tspan class="tr-en">Fixed model (Opus 5.5 · effort medium) on every step; high effort only for web research, performance testing and debugging.</tspan></text>
+    </svg>
+    <div class="figcap"><span class="tr-es">El loop completo, según la demo en vivo (15:00–44:18) y la sección del retro (51:05).</span><span class="tr-en">The full loop, per the live demo (15:00–44:18) and the retro section (51:05).</span></div>
+  </div>
+
+  <h3 style="margin-top:22px"><span class="tr-es">Los pasos, en texto</span><span class="tr-en">The steps, in text</span></h3>
+  <table>
+    <tr><th><span class="tr-es">Paso</span><span class="tr-en">Step</span></th><th><span class="tr-es">Qué pasa</span><span class="tr-en">What happens</span></th><th>Min</th></tr>
+    <tr><td><span class="paso">1</span>Grill with Docs</td><td><span class="tr-es">Prompt vago + skill; el agente explora el repo (sub agent en background que hace «peek»), consulta glossary/ADRs y te quizzear con preguntas tácticas.</span><span class="tr-en">Vague prompt + skill; the agent explores the repo (a background sub agent doing a “peek”), consults glossary/ADRs and quizzes you with tactical questions.</span></td><td>15:02</td></tr>
+    <tr><td><span class="paso">2</span><span class="tr-es">Decisión de ruta</span><span class="tr-en">Route decision</span></td><td><span class="tr-es">Pequeño → skill</span><span class="tr-en">Small →</span> <code>implement</code> <span class="tr-es">en la misma sesión. Grande → spec.</span><span class="tr-en">skill in the same session. Big → spec.</span></td><td>25:21</td></tr>
+    <tr><td><span class="paso">3</span>Spec</td><td><span class="tr-es">La conversación grilada se condensa en markdown o issue de GitHub: contra ella se verifica el producto final.</span><span class="tr-en">The grilled conversation is condensed into markdown or a GitHub issue: the final product is verified against it.</span></td><td>27:32</td></tr>
+    <tr><td><span class="paso">3</span>Tickets</td><td><span class="tr-es">La spec se divide en tickets como sub-issues; cada uno calibrado a ~150K tokens para que su sub agent no entre en la dumb zone.</span><span class="tr-en">The spec is split into tickets as sub-issues; each tuned to ~150K tokens so its sub agent doesn't enter the dumb zone.</span></td><td>27:59 · 36:49</td></tr>
+    <tr><td><span class="paso">4</span>Implement-spec</td><td><span class="tr-es">Sesión nueva: orquestador + sub agents en worktrees paralelos → un solo mega PR.</span><span class="tr-en">New session: orchestrator + sub agents in parallel worktrees → a single mega PR.</span></td><td>34:38</td></tr>
+    <tr><td><span class="paso">5</span>Code-review</td><td><span class="tr-es">Adversarial en dos ejes: ¿se construyó lo correcto (spec)? ¿está bien construido (coding-standards.md + seguridad)?</span><span class="tr-en">Adversarial on two axes: was the right thing built (spec)? was it built well (coding-standards.md + security)?</span></td><td>37:28</td></tr>
+    <tr><td><span class="paso">6</span>PR body</td><td><span class="tr-es">Skill</span><span class="tr-en"></span> <code>pr</code><span class="tr-es">: summary visual, evidencia de funcionamiento y</span><span class="tr-en"> skill: visual summary, evidence it works and</span> <b>merge danger</b> (one/two-way door + blast radius).</td><td>40:18</td></tr>
+    <tr><td><span class="paso">7</span>Human review</td><td><span class="tr-es">Solo lo que el merge danger dicte; si se revisa, es «intentando romperlo», no diff por diff.</span><span class="tr-en">Only what the merge danger dictates; if reviewed, it's “trying to break it”, not diff by diff.</span></td><td>41:20</td></tr>
+    <tr><td><span class="paso">·</span>Merge</td><td><span class="tr-es">Incluido el modo perezoso: «okay guys, merge all these five PRs» — el agente resuelve el orden.</span><span class="tr-en">Including the lazy mode: “okay guys, merge all these five PRs” — the agent works out the order.</span></td><td>43:58</td></tr>
+    <tr><td><span class="paso">8</span>Retro</td><td><span class="tr-es">Mira sesión + PR + comentarios humanos y devuelve mejoras al entorno. Cada comentario de review debe volverse innecesario.</span><span class="tr-en">Looks at session + PR + human comments and returns improvements to the environment. Every review comment should become unnecessary.</span></td><td>41:59 · 42:37</td></tr>
+  </table>
+
+  <h3 style="margin-top:26px"><span class="tr-es">La escalera de confianza (trust ladder), según Lauren Tan «Potato»</span><span class="tr-en">The trust ladder, according to Lauren Tan “Potato”</span></h3>
+  <div class="fig">
+    <svg viewBox="0 -70 920 414" role="img" aria-label="Escalera de confianza">
+    <style>
+  .bx{fill:color-mix(in srgb, var(--foreground, #fff) 4%, transparent); stroke:var(--border, #3a3a44); stroke-width:1.2}
+  .hl{fill:color-mix(in srgb, var(--accent, #7fd8a8) 9%, transparent); stroke:var(--accent, #7fd8a8); stroke-width:1.5}
+  .env{fill:color-mix(in srgb, var(--accent, #7fd8a8) 7%, transparent); stroke:var(--accent, #7fd8a8); stroke-width:1.2; stroke-dasharray:5 4}
+  .lb{fill:var(--foreground, #e8e6e2); font-weight:600; font-size:13px}
+  .sb{fill:var(--muted-foreground, #9a968f); font-size:12px}
+  .ab{fill:var(--accent, #7fd8a8); font-weight:600; font-size:12px}
+  .nb{fill:color-mix(in srgb, var(--accent, #7fd8a8) 16%, transparent); stroke:var(--accent, #7fd8a8); stroke-width:1}
+  .num{fill:var(--accent, #7fd8a8); font-size:12px; font-weight:700}
+  .ln{fill:none; stroke:var(--muted-foreground, #9a968f); stroke-width:1.3; marker-end:url(#ar)}
+  .lna{fill:none; stroke:var(--accent, #7fd8a8); stroke-width:1.6; marker-end:url(#ara)}
+  .lnd{fill:none; stroke:var(--muted-foreground, #9a968f); stroke-width:1.2; stroke-dasharray:3 4}
+  .pill{fill:color-mix(in srgb, var(--accent, #7fd8a8) 12%, transparent); stroke:var(--accent, #7fd8a8); stroke-width:1.4}
+  .step{fill:color-mix(in srgb, var(--accent, #7fd8a8) 6%, transparent); stroke:var(--border, #3a3a44); stroke-width:1.2}
+  .steptop{fill:color-mix(in srgb, var(--accent, #7fd8a8) 14%, transparent); stroke:var(--accent, #7fd8a8); stroke-width:1.4}
+  .base{stroke:var(--border, #3a3a44); stroke-width:1.2}
+</style>
+<defs>
+  <marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--muted-foreground, #9a968f)"/></marker>
+  <marker id="ara" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8z" fill="var(--accent, #7fd8a8)"/></marker>
+</defs>
+    <line x1="14" y1="270" x2="906" y2="270" class="base"/>
+    <path class="lna" d="M40 174 L850 -38" style="stroke-dasharray:6 6;opacity:.45"/>
+    <text x="769" y="-50" class="ab"><tspan class="tr-es">confianza acumulada →</tspan><tspan class="tr-en">accumulated trust →</tspan></text>
+    <rect x="14" y="224" width="139" height="46" rx="8" class="step"/><text x="24" y="214" class="lb"><tspan class="tr-es">Sin entorno</tspan><tspan class="tr-en">No environment</tspan></text><text x="24" y="246" class="sb"><tspan class="tr-es">todo línea por línea ·</tspan><tspan class="tr-en">everything line by line ·</tspan></text><text x="24" y="262" class="sb"><tspan class="tr-es">≤4 agentes a la vez</tspan><tspan class="tr-en">≤4 agents at a time</tspan></text>
+    <rect x="165" y="184" width="139" height="86" rx="8" class="step"/><text x="175" y="174" class="lb"><tspan class="tr-es">Checks duros</tspan><tspan class="tr-en">Hard checks</tspan></text><text x="175" y="206" class="sb">types + tests + lint:</text><text x="175" y="222" class="sb"><tspan class="tr-es">el agente se</tspan><tspan class="tr-en">the agent</tspan></text><text x="175" y="238" class="sb"><tspan class="tr-es">auto-verifica</tspan><tspan class="tr-en">self-verifies</tspan></text>
+    <rect x="316" y="144" width="139" height="126" rx="8" class="step"/><text x="326" y="134" class="lb"><tspan class="tr-es">Evidencia</tspan><tspan class="tr-en">Evidence</tspan></text><text x="326" y="166" class="sb"><tspan class="tr-es">capturas y ejecución</tspan><tspan class="tr-en">screenshots and runs</tspan></text><text x="326" y="182" class="sb"><tspan class="tr-es">en el PR + merge</tspan><tspan class="tr-en">in the PR + merge</tspan></text><text x="326" y="198" class="sb"><tspan class="tr-es">danger declarado</tspan><tspan class="tr-en">declared danger</tspan></text>
+    <rect x="467" y="104" width="139" height="166" rx="8" class="step"/><text x="477" y="94" class="lb">Auto-merge</text><text x="477" y="126" class="sb"><tspan class="tr-es">two-way doors con</tspan><tspan class="tr-en">two-way doors with</tspan></text><text x="477" y="142" class="sb"><tspan class="tr-es">sampling: 1 PR de 5 +</tspan><tspan class="tr-en">sampling: 1 PR in 5 +</tspan></text><text x="477" y="158" class="sb"><tspan class="tr-es">retro de los últimos 5</tspan><tspan class="tr-en">retro of the last 5</tspan></text>
+    <rect x="618" y="64" width="139" height="206" rx="8" class="step"/><text x="628" y="54" class="lb"><tspan class="tr-es">Revisión dura</tspan><tspan class="tr-en">Hard review</tspan></text><text x="628" y="86" class="sb"><tspan class="tr-es">one-way doors: «trying</tspan><tspan class="tr-en">one-way doors: “trying</tspan></text><text x="628" y="102" class="sb"><tspan class="tr-es">to break it», effort alto</tspan><tspan class="tr-en">to break it”, high effort</tspan></text><text x="628" y="118" class="sb"><tspan class="tr-es">en seguridad</tspan><tspan class="tr-en">on security</tspan></text>
+    <rect x="769" y="24" width="139" height="246" rx="8" class="steptop"/><text x="779" y="14" class="lb"><tspan class="tr-es">Cientos en paralelo</tspan><tspan class="tr-en">Hundreds in parallel</tspan></text><text x="779" y="46" class="sb"><tspan class="tr-es">agentes concurrentes</tspan><tspan class="tr-en">concurrent agents</tspan></text><text x="779" y="62" class="sb"><tspan class="tr-es">fusionando sin</tspan><tspan class="tr-en">merging without</tspan></text><text x="779" y="78" class="sb"><tspan class="tr-es">revisión humana</tspan><tspan class="tr-en">human review</tspan></text>
+    <text x="14" y="330" class="sb"><tspan class="tr-es">Sin entorno: sin evidencia ni checks, el cuello de botella eres tú (≈4 agentes). Con cada peldaño, la verificación determinista sustituye tu atención.</tspan><tspan class="tr-en">No environment: without evidence or checks, the bottleneck is you (≈4 agents). With each rung, deterministic verification replaces your attention.</tspan></text>
+    </svg>
+    <div class="figcap"><span class="tr-es">La trust ladder de Lauren Tan «Potato» tal como Matt la describe (44:52–46:20).</span><span class="tr-en">Lauren Tan “Potato”'s trust ladder as Matt describes it (44:52–46:20).</span></div>
+  </div>
+
+</section>
+
+<!-- ============ SETUP ============ -->
+<section id="setup">
+  <div class="sec-head"><h2><span class="tr-es">El setup de desarrollo óptimo, extrapolado del video</span><span class="tr-en">The optimal development setup, extrapolated from the video</span></h2>
+  <p class="dim"><span class="tr-es">El «starter stack» de Matt es deliberadamente aburrido (52:37). Lo interesante no es qué instales, sino en qué orden construyes el entorno. Paso a paso para replicarlo en un proyecto desde cero.</span><span class="tr-en">Matt's “starter stack” is deliberately boring (52:37). The interesting part isn't what you install, but the order you build the environment in. Step by step to replicate it in a from-scratch project.</span></p></div>
+
+  <div class="step"><div class="n">1</div><div><h3><span class="tr-es">Prerrequisitos mínimos</span><span class="tr-en">Bare-minimum prerequisites</span></h3>
+    <ul>
+      <li><span class="tr-es">Una máquina con</span><span class="tr-en">A machine with</span> <b>Git</b>, <b>VS Code</b> <span class="tr-es">(Matt lo prefiere sobre el puro terminal: «necesitas ver el código») y cuenta en</span><span class="tr-en">(Matt prefers it over the pure terminal: “you need to see the code”) and a</span> <b>GitHub</b><span class="tr-es">.</span><span class="tr-en"> account.</span></li>
+      <li><span class="tr-es">Un harness que soporte skills y sub agents:</span><span class="tr-en">A harness that supports skills and sub agents:</span> <b>Claude Code</b> <span class="tr-es">(«uno de los mejores harnesses»). Matt usa una sola suscripción de Anthropic, plan 20x — no tres.</span><span class="tr-en">(“one of the best harnesses”). Matt uses a single Anthropic subscription, the 20x plan — not three.</span></li>
+      <li><span class="tr-es">Dictado por voz (Whisper Flow o equivalente). «If you're not dictating, you're going way too slow.»</span><span class="tr-en">Voice dictation (Whisper Flow or equivalent). “If you're not dictating, you're going way too slow.”</span></li>
+    </ul></div></div>
+
+  <div class="step"><div class="n">2</div><div><h3><span class="tr-es">Instalar el agente</span><span class="tr-en">Install the agent</span></h3>
+<pre><code><span class="tr-es">npm install -g @anthropic-ai/claude-code
+claude   # primera autenticación</span><span class="tr-en">npm install -g @anthropic-ai/claude-code
+claude   # first authentication</span></code></pre>
+    <p><span class="tr-es">Regla de oro del episodio: deja el</span><span class="tr-en">The episode's golden rule: pin the</span> <b><span class="tr-es">modelo fijo en Opus 5.5 con effort medium</span><span class="tr-en">model to Opus 5.5 on effort medium</span></b> <span class="tr-es">para todo, y no lo toques. Effort alto solo para research web, performance testing y debugging terco.</span><span class="tr-en">for everything, and don't touch it. High effort only for web research, performance testing and stubborn debugging.</span></p></div></div>
+
+  <div class="step"><div class="n">3</div><div><h3><span class="tr-es">Instalar las skills de Matt</span><span class="tr-en">Install Matt's skills</span></h3>
+<pre><code><span class="tr-es"># repo: github.com/mattpocock/skills  ·  docs: aihero.dev/skills
+# la documentación de cada skill indica su instalación en un comando</span><span class="tr-en"># repo: github.com/mattpocock/skills  ·  docs: aihero.dev/skills
+# each skill's docs show a one-command install</span></code></pre>
+    <p><span class="tr-es">El set principal:</span><span class="tr-en">The main set:</span> <code>setup-matt-pocock-skills</code> → <code>grill-with-docs</code> → <code>to-spec</code> → <code>to-tickets</code> → <code>implement</code> → <code>code-review</code> → <code>retro</code><span class="tr-es">, más</span><span class="tr-en">, plus</span> <code>implement-spec</code>, <code>improve-codebase-architecture</code>, <code>teach</code> <span class="tr-es">y las de referencia (como</span><span class="tr-en">and the reference ones (like</span> <code>pr</code>).</p></div></div>
+
+  <div class="step"><div class="n">4</div><div><h3><span class="tr-es">Nunca escribas el glosario a mano</span><span class="tr-en">Never write the glossary by hand</span></h3>
+    <p><span class="tr-es">Simplemente lanza tu primera feature con</span><span class="tr-en">Just launch your first feature with</span> <code>/grill-with-docs</code> <span class="tr-es">+ un prompt vago. El agente irá «acuñando» términos de dominio en los puntos calientes y te ofrecerá alinear el código. En un par de sesiones tendrás el</span><span class="tr-en">+ a vague prompt. The agent will start “coining” domain terms in the hot spots and offer to align the code. After a couple of sessions you'll have the</span> <code>glossary</code> <span class="tr-es">y los primeros ADRs vivos. (15:11, 23:18)</span><span class="tr-en">and the first live ADRs. (15:11, 23:18)</span></p></div></div>
+
+  <div class="step"><div class="n">5</div><div><h3> <span class="tr-es">coding-standards.md, no agents.md-para-todo</span><span class="tr-en">coding-standards.md, not agents.md-for-everything</span></h3>
+<pre><code><span class="tr-es"># docs/coding-standards.md  (esqueleto mínimamente viable)
+- TypeScript estricto; prohibido `any` — "every any is a leak"
+- Sin acceso a DB fuera del módulo de data; alta locality
+- Testea módulos a través de su entry point (deep modules)
+- Frontend: sin estado duplicado; una fuente de verdad por dato</span><span class="tr-en"># docs/coding-standards.md  (minimally viable skeleton)
+- Strict TypeScript; `any` banned — “every any is a leak”
+- No DB access outside the data module; high locality
+- Test modules through their entry point (deep modules)
+- Frontend: no duplicated state; one source of truth per value</span></code></pre>
+    <p><span class="tr-es">Truco verificado en el video (51:05): «I want to constrain my application more — find me harsh lint rules». Los agentes encuentran las reglas que mejor los encierran.</span><span class="tr-en">Trick verified in the video (51:05): “I want to constrain my application more — find me harsh lint rules”. Agents find the rules that best cage them.</span></p></div></div>
+
+  <div class="step"><div class="n">6</div><div><h3><span class="tr-es">Data resuelta primero</span><span class="tr-en">Data settled first</span></h3>
+    <ul>
+      <li><span class="tr-es">Base de datos:</span><span class="tr-en">Database:</span> <b>Postgres</b> <span class="tr-es">(«si no sabes qué estás haciendo»), hosted:</span><span class="tr-en">(“if you don't know what you're doing”), hosted:</span> <b>Supabase</b> <span class="tr-es">o</span><span class="tr-en">or</span> <b>PlanetScale</b>.</li>
+      <li><span class="tr-es">Auth y pagos: servicios gestionados; no los escribas — Matt ni nombra uno porque la regla es «usa lo que el agente conozca bien».</span><span class="tr-en">Auth and payments: managed services; don't write them — Matt doesn't even name one because the rule is “use what the agent knows well”.</span></li>
+    </ul></div></div>
+
+  <div class="step"><div class="n">7</div><div><h3><span class="tr-es">Deploy determinista</span><span class="tr-en">Deterministic deploy</span></h3>
+    <ul>
+      <li>Web: <b>Vercel</b> <span class="tr-es">o Netlify con push-to-deploy — «anything», lo más fácil; nada de AWS manual con sus footguns. Estáticos: GitHub Pages.</span><span class="tr-en">or Netlify with push-to-deploy — “anything”, the easiest; no manual AWS with its footguns. Static sites: GitHub Pages.</span></li>
+      <li><span class="tr-es">DNS/dominio/seguridad:</span><span class="tr-en">DNS/domain/security:</span> <b>Cloudflare</b>.</li>
+      <li><span class="tr-es">Prompt de seguridad (78:09): «make this deploy as good as possible — everything I might need: DDoS attacks, etc.»</span><span class="tr-en">Security prompt (78:09): “make this deploy as good as possible — everything I might need: DDoS attacks, etc.”</span></li>
+      <li><span class="tr-es">El merge a la rama default dispara Vercel — cero tokens gastados en deploys. «Always choose determinism.»</span><span class="tr-en">Merging to the default branch triggers Vercel — zero tokens spent on deploys. “Always choose determinism.”</span></li>
+    </ul></div></div>
+
+  <div class="step"><div class="n">8</div><div><h3><span class="tr-es">Automatización de fondo</span><span class="tr-en">Background automation</span></h3>
+    <ul>
+      <li><b>GitHub Actions</b> <span class="tr-es">corriendo Claude con un cron diario por repo: ejecuta</span><span class="tr-en">running Claude on a daily cron per repo: it runs</span> <code>improve-codebase-architecture</code><span class="tr-es">, toma la sugerencia top y abre un PR two-way door (62:16).</span><span class="tr-en">, takes the top suggestion and opens a two-way door PR (62:16).</span></li>
+      <li><span class="tr-es">Revisión por</span><span class="tr-en"></span> <b><span class="tr-es">sampling</span><span class="tr-en">Sampling</span></b><span class="tr-es">: uno de cada ~5 PRs automáticos, y un</span><span class="tr-en"> review: one in ~5 automatic PRs, plus an occasional</span> <code>retro</code> <span class="tr-es">ocasional sobre los últimos 5.</span><span class="tr-en">over the last 5.</span></li>
+      <li><span class="tr-es">Worktrees para paralelizar features:</span><span class="tr-en">Worktrees to parallelize features:</span> <code>git worktree add ../repo-ticket-N -b ticket-N</code> <span class="tr-es">— o deja que</span><span class="tr-en">— or let</span> <code>implement-spec</code> <span class="tr-es">los gestione solo.</span><span class="tr-en">handle them on its own.</span></li>
+    </ul></div></div>
+
+  <div class="step"><div class="n">9</div><div><h3><span class="tr-es">Política de revisión escrita</span><span class="tr-en">A written review policy</span></h3>
+    <p><span class="tr-es">Matriz merge danger en el repo: two-way + blast radius pequeño → test en producción, sin revisión; one-way (migraciones irreversibles, emails masivos, pagos) → revisión humana «trying to break it» y effort alto en verificación. En dominio crítico, prohibido el auto-merge.</span><span class="tr-en">Merge danger matrix in the repo: two-way + small blast radius → test in production, no review; one-way (irreversible migrations, mass emails, payments) → human review “trying to break it” and high effort on verification. In critical domains, auto-merge is banned.</span></p></div></div>
+
+  <div class="step"><div class="n">10</div><div><h3><span class="tr-es">Hábitos del operator (lo que separa el setup de funcionar en serio)</span><span class="tr-en">Operator habits (what separates the setup from actually working)</span></h3>
+    <ul>
+      <li><span class="tr-es">Vigila los tokens de la sesión; cerca de 150K, abre otra. «Context paranoia» es la habilidad.</span><span class="tr-en">Watch session tokens; near 150K, open another. “Context paranoia” is the skill.</span></li>
+      <li><span class="tr-es">Después de cada sesión:</span><span class="tr-en">After every session:</span> <code>/retro</code><span class="tr-es">. Después de cada comentario de review humano: va a coding-standards.md.</span><span class="tr-en">. After every human review comment: it goes into coding-standards.md.</span></li>
+      <li><span class="tr-es">Para planning denso: papel y boli primero, brain-dump por dictado después.</span><span class="tr-en">For dense planning: pen and paper first, dictation brain-dump after.</span></li>
+      <li><span class="tr-es">Los sábados, si quieres el modo software factory: convierte un trigger (nuevo issue → agente) en loop con frenos one-way/two-way.</span><span class="tr-en">On Saturdays, if you want software-factory mode: turn a trigger (new issue → agent) into a loop with one-way/two-way brakes.</span></li>
+    </ul></div></div>
+
+  <div class="note"><span class="tr-es">Extrapolación honesta: Matt no describe un «stack» con framework/ORM/auth concretos en el video. Lo anterior completa sus lagunas con las reglas que sí declaró (determinismo, hosting gestionado, Postgres por defecto, harness con skills). Nada de esto es un canon — es su state-of-the-art de hoy, y él mismo dice que la bitter lesson lo barrerá algún día.</span><span class="tr-en">Honest extrapolation: Matt doesn't describe a “stack” with a concrete framework/ORM/auth in the video. The above fills his gaps with rules he did state (determinism, managed hosting, Postgres by default, a harness with skills). None of this is canon — it's his state-of-the-art today, and he himself says the bitter lesson will sweep it away someday.</span></div>
+</section>
+
+<!-- ============ GUÍA DE ESTUDIO ============ -->
+<section id="estudio">
+  <div class="sec-head"><h2><span class="tr-es">Guía programática de estudio</span><span class="tr-en">Programmatic study guide</span></h2>
+  <p class="dim"><span class="tr-es">Programa de 8 semanas construido solo con las fuentes del episodio. Cada módulo tiene lectura/viewing, práctica obligatoria y un deliverable verificable. El progreso se guarda en tu navegador (checkboxes).</span><span class="tr-en">An 8-week program built only from the episode's sources. Each module has reading/viewing, mandatory practice and a verifiable deliverable. Progress is saved in your browser (checkboxes).</span></p></div>
+
+  <div class="progress-wrap">
+    <b id="prog-label"><span class="tr-es">0 de 36 tareas · 0%</span><span class="tr-en">0 of 36 tasks · 0%</span></b>
+    <div class="progress-track"><div class="progress-fill" id="prog"></div></div>
+  </div>
+
+  <div class="mod" data-mod="a"><h3><span class="tr-es">Módulo A · Fundamentos: táctico vs estratégico</span><span class="tr-en">Module A · Foundations: tactical vs strategic</span> <span class="week"><span class="tr-es">Semana 1</span><span class="tr-en">Week 1</span></span></h3>
+    <div class="tagrow"><span class="tag">Video 5:03–12:35</span><span class="tag"><span class="tr-es">Ousterhout caps. 1–4</span><span class="tr-en">Ousterhout chs. 1–4</span></span></div>
+    <label><input type="checkbox" data-k="a1"><span><span class="tr-es">Ver los capítulos de tactical/strategic y la crítica al vibe coding.</span><span class="tr-en">Watch the tactical/strategic chapters and the vibe coding critique.</span></span></label>
+    <label><input type="checkbox" data-k="a2"><span><span class="tr-es">Leer los primeros capítulos de</span><span class="tr-en">Read the first chapters of</span> <i>A Philosophy of Software Design</i> <span class="tr-es">(o el</span><span class="tr-en">(or</span> <code>/teach</code> <span class="tr-es">sobre él).</span><span class="tr-en">on it).</span></span></label>
+    <label><input type="checkbox" data-k="a3"><span><span class="tr-es">Clasificar tu última semana de trabajo: qué fue táctico (delegable al agente) y qué estratégico (tuyo).</span><span class="tr-en">Classify your last week of work: what was tactical (delegable to the agent) and what strategic (yours).</span></span></label>
+    <label><input type="checkbox" data-k="a4"><span><span class="tr-es">Escribir tu definición de «care»: 3 cosas de tu codebase que te importan y por qué.</span><span class="tr-en">Write your definition of “care”: 3 things about your codebase you care about and why.</span></span></label>
+    <div class="deliv"><span class="tr-es">📦 Deliverable: ensayo de 1 página «mi tiempo táctico → estratégico», y una lista de delegación.</span><span class="tr-en">📦 Deliverable: a 1-page essay “my tactical → strategic time”, plus a delegation list.</span></div></div>
+
+  <div class="mod" data-mod="b"><h3><span class="tr-es">Módulo B · Lenguaje de dominio: grill + glossary + ADRs</span><span class="tr-en">Module B · Domain language: grill + glossary + ADRs</span> <span class="week"><span class="tr-es">Semana 1–2</span><span class="tr-en">Weeks 1–2</span></span></h3>
+    <div class="tagrow"><span class="tag">Video 12:35–25:18</span><span class="tag"><span class="tr-es">Evans, DDD caps. 1–3</span><span class="tr-en">Evans, DDD chs. 1–3</span></span></div>
+    <label><input type="checkbox" data-k="b1"><span><span class="tr-es">Instalar las skills desde aihero.dev/skills y correr</span><span class="tr-en">Install the skills from aihero.dev/skills and run</span> <code>/setup-matt-pocock-skills</code>.</span></label>
+    <label><input type="checkbox" data-k="b2"><span><span class="tr-es">Hacer tu primera feature real con</span><span class="tr-en">Do your first real feature with</span> <code>/grill-with-docs</code> <span class="tr-es">dejando que el agente acuñe el glosario.</span><span class="tr-en"> letting the agent coin the glossary.</span></span></label>
+    <label><input type="checkbox" data-k="b3"><span><span class="tr-es">Crear</span><span class="tr-en">Create</span> <code>docs/adr/</code> <span class="tr-es">y escribir los 2 primeros ADRs de decisiones reversibles-peligrosas que ya existan en tu repo.</span><span class="tr-en">and write the first 2 ADRs for risky-to-reverse decisions that already exist in your repo.</span></span></label>
+    <label><input type="checkbox" data-k="b4"><span><span class="tr-es">Comparar 1 capítulo de Evans con lo que el glossary generó solo: ¿qué términos faltaron?</span><span class="tr-en">Compare 1 Evans chapter with what the glossary generated on its own: which terms were missing?</span></span></label>
+    <div class="deliv"><span class="tr-es">📦 Deliverable: glossary v1 emergido + 2 ADRs en el repo + una feature grilada de punta a punta.</span><span class="tr-en">📦 Deliverable: an emerged glossary v1 + 2 ADRs in the repo + one feature grilled end to end.</span></div></div>
+
+  <div class="mod" data-mod="c"><h3><span class="tr-es">Módulo C · Gestión de contexto y effort</span><span class="tr-en">Module C · Context and effort management</span> <span class="week"><span class="tr-es">Semana 2</span><span class="tr-en">Week 2</span></span></h3>
+    <div class="tagrow"><span class="tag">Video 25:18–34:35</span><span class="tag">12-factor-agents (Dex Horthy)</span></div>
+    <label><input type="checkbox" data-k="c1"><span><span class="tr-es">Instalar/leer 12-factor-agents del repo humanlayer — el origen de smart/dumb zone.</span><span class="tr-en">Install/read 12-factor-agents from the humanlayer repo — the origin of the smart/dumb zone.</span></span></label>
+    <label><input type="checkbox" data-k="c2"><span><span class="tr-es">Una semana entera vigilando el contador de tokens: sesión nueva al acercarse a 150K. Registrar cuántas veces «compactas».</span><span class="tr-en">A whole week watching the token counter: new session as it nears 150K. Log how many times you “compact”.</span></span></label>
+    <label><input type="checkbox" data-k="c3"><span><span class="tr-es">Bajar el effort a medium por defecto durante 5 días; anotar los casos donde sí subiste.</span><span class="tr-en">Drop effort to medium by default for 5 days; note the cases where you did raise it.</span></span></label>
+    <label><input type="checkbox" data-k="c4"><span><span class="tr-es">Usar sub agents para toda exploración de código; nota si tu conversación principal se mantiene limpia.</span><span class="tr-en">Use sub agents for all code exploration; note whether your main conversation stays clean.</span></span></label>
+    <div class="deliv"><span class="tr-es">📦 Deliverable: log de sesiones con tokens/effort por tarea + tus 3 reglas personales de context paranoia.</span><span class="tr-en">📦 Deliverable: a session log with tokens/effort per task + your 3 personal context-paranoia rules.</span></div></div>
+
+  <div class="mod" data-mod="d"><h3><span class="tr-es">Módulo D · Spec-first y tickets</span><span class="tr-en">Module D · Spec-first and tickets</span> <span class="week"><span class="tr-es">Semana 3</span><span class="tr-en">Week 3</span></span></h3>
+    <div class="tagrow"><span class="tag">Video 25:18–36:49</span></div>
+    <label><input type="checkbox" data-k="d1"><span><span class="tr-es">Tomar una feature grande pendiente y grilarla →</span><span class="tr-en">Take a pending big feature and grill it →</span> <code>/to-spec</code> <span class="tr-es">→ issue de spec en GitHub.</span><span class="tr-en">→ a spec issue on GitHub.</span></span></label>
+    <label><input type="checkbox" data-k="d2"><span><span class="tr-es">Dividirla en tickets como sub-issues, cada uno estimado en ≤150K tokens.</span><span class="tr-en">Split it into tickets as sub-issues, each estimated at ≤150K tokens.</span></span></label>
+    <label><input type="checkbox" data-k="d3"><span><span class="tr-es">Implementar un ticket por sesión individual y verificar el producto contra la spec (no contra el código).</span><span class="tr-en">Implement one ticket per individual session and verify the product against the spec (not against the code).</span></span></label>
+    <label><input type="checkbox" data-k="d4"><span><span class="tr-es">Escribir el «merge danger» de cada ticket a mano para interiorizar la heurística.</span><span class="tr-en">Write each ticket's “merge danger” by hand to internalize the heuristic.</span></span></label>
+    <div class="deliv"><span class="tr-es">📦 Deliverable: spec + 4–6 sub-issues, uno cerrado; tu primera «hacia dónde voy» documentada.</span><span class="tr-en">📦 Deliverable: spec + 4–6 sub-issues, one closed; your first documented “where I'm headed”.</span></div></div>
+
+  <div class="mod" data-mod="e"><h3><span class="tr-es">Módulo E · Worktrees, sub agents y review</span><span class="tr-en">Module E · Worktrees, sub agents and review</span> <span class="week"><span class="tr-es">Semana 4</span><span class="tr-en">Week 4</span></span></h3>
+    <div class="tagrow"><span class="tag">Video 34:35–44:52</span></div>
+    <label><input type="checkbox" data-k="e1"><span><span class="tr-es">Correr</span><span class="tr-en">Run</span> <code>implement-spec</code> <span class="tr-es">sobre tu spec del módulo D: sub agents en worktrees → mega PR.</span><span class="tr-en">over your module D spec: sub agents in worktrees → mega PR.</span></span></label>
+    <label><input type="checkbox" data-k="e2"><span><span class="tr-es">Escribir</span><span class="tr-en">Write</span> <code>coding-standards.md</code> <span class="tr-es">con al menos 6 reglas accionables (incluida la prohibición de</span><span class="tr-en">with at least 6 actionable rules (including the</span> <code>any</code> <span class="tr-es">si usas TS).</span><span class="tr-en">ban if you use TS).</span></span></label>
+    <label><input type="checkbox" data-k="e3"><span><span class="tr-es">Hacer un code review adversarial doble (spec + standards) y un human review «trying to break it».</span><span class="tr-en">Do a double adversarial code review (spec + standards) and a human review “trying to break it”.</span></span></label>
+    <label><input type="checkbox" data-k="e4"><span><span class="tr-es">Correr la skill</span><span class="tr-en">Run the</span> <code>pr</code> <span class="tr-es">y decidir con el merge danger cuánto revisar. Después:</span><span class="tr-en">skill and use the merge danger to decide how much to review. Then:</span> <code>/retro</code>.</span></label>
+    <div class="deliv"><span class="tr-es">📦 Deliverable: un mega PR fusionado por el loop completo + primer retro aplicado al repo.</span><span class="tr-en">📦 Deliverable: a mega PR merged by the full loop + the first retro applied to the repo.</span></div></div>
+
+  <div class="mod" data-mod="f"><h3><span class="tr-es">Módulo F · Escalera de confianza: checks y deep modules</span><span class="tr-en">Module F · Trust ladder: checks and deep modules</span> <span class="week"><span class="tr-es">Semana 5</span><span class="tr-en">Week 5</span></span></h3>
+    <div class="tagrow"><span class="tag">Video 44:52–52:31</span><span class="tag"><span class="tr-es">Ousterhout caps. 4–15</span><span class="tr-en">Ousterhout chs. 4–15</span></span><span class="tag">Feathers (seams)</span></div>
+    <label><input type="checkbox" data-k="f1"><span><span class="tr-es">Auditar automated checks: tipos estrictos, suite de tests &lt;2 min, linters. Pedir «harsh lint rules».</span><span class="tr-en">Audit automated checks: strict types, test suite &lt;2 min, linters. Ask for “harsh lint rules”.</span></span></label>
+    <label><input type="checkbox" data-k="f2"><span><span class="tr-es">Reescribir 2 tests de «shallow» a deep module (entry point estrecho, interior libre).</span><span class="tr-en">Rewrite 2 tests from “shallow” to deep module (narrow entry point, free interior).</span></span></label>
+    <label><input type="checkbox" data-k="f3"><span><span class="tr-es">Convertir los últimos 3 comentarios de review humanos en checks deterministas vía</span><span class="tr-en">Convert the last 3 human review comments into deterministic checks via</span> <code>/retro</code>.</span></label>
+    <label><input type="checkbox" data-k="f4"><span><span class="tr-es">Subir un peldaño real de la escalera: un tipo de PR que hoy revisas y dejarás de revisar.</span><span class="tr-en">Climb a real rung of the ladder: a type of PR you review today and will stop reviewing.</span></span></label>
+    <div class="deliv"><span class="tr-es">📦 Deliverable: +2 automated checks nuevos, 2 tests re-esculpidos, un peldaño subido con evidencia.</span><span class="tr-en">📦 Deliverable: +2 new automated checks, 2 re-sculpted tests, one climbed rung with evidence.</span></div></div>
+
+  <div class="mod" data-mod="g"><h3><span class="tr-es">Módulo G · Arquitectura: improve-codebase-architecture y locality</span><span class="tr-en">Module G · Architecture: improve-codebase-architecture and locality</span> <span class="week"><span class="tr-es">Semana 6</span><span class="tr-en">Week 6</span></span></h3>
+    <div class="tagrow"><span class="tag">Video 52:31–68:15</span><span class="tag">Fowler, Refactoring</span><span class="tag">Feathers, Legacy Code</span></div>
+    <label><input type="checkbox" data-k="g1"><span><span class="tr-es">Correr</span><span class="tr-en">Run</span> <code>improve-codebase-architecture</code> <span class="tr-es">sobre tu repo y leer el reporte HTML (usa</span><span class="tr-en">on your repo and read the HTML report (use</span> <code>/teach</code> <span class="tr-es">con lo que no entiendas).</span><span class="tr-en">for whatever you don't understand).</span></span></label>
+    <label><input type="checkbox" data-k="g2"><span><span class="tr-es">Medir locality de tus últimos 5 commits: ¿cuántos archivos tocó cada cambio?</span><span class="tr-en">Measure locality over your last 5 commits: how many files did each change touch?</span></span></label>
+    <label><input type="checkbox" data-k="g3"><span><span class="tr-es">Montar el cron job diario en GitHub Actions que abre 1 PR arquitectónico (two-way door).</span><span class="tr-en">Set up the daily GitHub Actions cron that opens 1 architectural PR (two-way door).</span></span></label>
+    <label><input type="checkbox" data-k="g4"><span><span class="tr-es">Aplicar un «seam» de Feathers a tu módulo más odiado para poder testearlo.</span><span class="tr-en">Apply a Feathers “seam” to your most hated module so you can test it.</span></span></label>
+    <div class="deliv"><span class="tr-es">📦 Deliverable: pipeline de arquitectura diario corriendo + 1 refactor estructural fusionado.</span><span class="tr-en">📦 Deliverable: a daily architecture pipeline running + 1 structural refactor merged.</span></div></div>
+
+  <div class="mod" data-mod="h"><h3><span class="tr-es">Módulo H · Infraestructura determinista</span><span class="tr-en">Module H · Deterministic infrastructure</span> <span class="week"><span class="tr-es">Semana 7</span><span class="tr-en">Week 7</span></span></h3>
+    <div class="tagrow"><span class="tag">Video 74:11–86:38</span></div>
+    <label><input type="checkbox" data-k="h1"><span><span class="tr-es">Montar el stack: Postgres gestionado (Supabase/PlanetScale) + Vercel push-to-deploy + Cloudflare.</span><span class="tr-en">Set up the stack: managed Postgres (Supabase/PlanetScale) + Vercel push-to-deploy + Cloudflare.</span></span></label>
+    <label><input type="checkbox" data-k="h2"><span><span class="tr-es">Ejecutar el prompt de seguridad («everything I might need… DDoS») y una security-review por PR.</span><span class="tr-en">Run the security prompt (“everything I might need… DDoS”) and a security-review per PR.</span></span></label>
+    <label><input type="checkbox" data-k="h3"><span><span class="tr-es">Eliminar todo deploy manual: el merge a main es la única acción de deploy.</span><span class="tr-en">Eliminate all manual deploys: merging to main is the only deploy action.</span></span></label>
+    <label><input type="checkbox" data-k="h4"><span><span class="tr-es">Auditar qué procesos tuyos son no-deterministas y convertir 1 a CI.</span><span class="tr-en">Audit which of your processes are non-deterministic and convert 1 to CI.</span></span></label>
+    <div class="deliv"><span class="tr-es">📦 Deliverable: pipeline donde ningún humano (ni agente) toque producción a mano.</span><span class="tr-en">📦 Deliverable: a pipeline where no human (or agent) touches production by hand.</span></div></div>
+
+  <div class="mod" data-mod="i"><h3><span class="tr-es">Módulo I · Software factory y vida con agentes</span><span class="tr-en">Module I · Software factory and life with agents</span> <span class="week"><span class="tr-es">Semana 8</span><span class="tr-en">Week 8</span></span></h3>
+    <div class="tagrow"><span class="tag">Video 94:41–120:00</span><span class="tag">Karpathy LLM wiki</span></div>
+    <label><input type="checkbox" data-k="i1"><span><span class="tr-es">Diseñar el trigger de tu factory: un evento externo (issue nuevo, warning de BD) que despierte a un agente.</span><span class="tr-en">Design your factory's trigger: an external event (new issue, DB warning) that wakes an agent.</span></span></label>
+    <label><input type="checkbox" data-k="i2"><span><span class="tr-es">Escribir la política de frenos: qué es one-way (nunca auto-merge) y qué se auto-fusiona.</span><span class="tr-en">Write the brakes policy: what is one-way (never auto-merge) and what gets auto-merged.</span></span></label>
+    <label><input type="checkbox" data-k="i3"><span><span class="tr-es">Leer los «clásicos en papel» pendientes (Pragmatic Programmer, Fowler o Beck) con</span><span class="tr-en">Read the pending “classics on paper” (Pragmatic Programmer, Fowler or Beck) with</span> <code>/teach</code>.</span></label>
+    <label><input type="checkbox" data-k="i4"><span><span class="tr-es">Un agente personal de vida: standup diario o wiki de tu audiencia/contexto, con cron de ingestión.</span><span class="tr-en">A personal life agent: daily standup or an audience/context wiki, with an ingestion cron.</span></span></label>
+    <div class="deliv"><span class="tr-es">📦 Deliverable: un loop de software factory con frenos documentado + tu agente de standup semanal.</span><span class="tr-en">📦 Deliverable: a documented software-factory loop with brakes + your weekly standup agent.</span></div></div>
+</section>
+
+<!-- ============ LECTURAS ============ -->
+<section id="lecturas">
+  <div class="sec-head"><h2><span class="tr-es">Bibliografía recomendada</span><span class="tr-en">Recommended reading</span></h2>
+  <p class="dim"><span class="tr-es">Los libros que Matt nombra en el episodio («en papel»; el</span><span class="tr-en">The books Matt names in the episode (“on paper”;</span> <code>/teach</code> <span class="tr-es">aterriza cada uno a la práctica). Con el minuto donde los cita.</span><span class="tr-en">lands each one in practice). With the minute where he cites them.</span></p></div>
+  <table>
+    <tr><th><span class="tr-es">Libro</span><span class="tr-en">Book</span></th><th><span class="tr-es">Autor</span><span class="tr-en">Author</span></th><th><span class="tr-es">Para qué lo usa en el episodio</span><span class="tr-en">What he uses it for in the episode</span></th></tr>
+    <tr><td><a href="https://web.stanford.edu/~ouster/cgi-bin/book.php" target="_blank" rel="noopener">A Philosophy of Software Design</a></td><td>John Ousterhout</td><td><span class="tr-es">La espina dorsal: tactical/strategic, deep modules, complejidad accidental (5:03, 55:45)</span><span class="tr-en">The backbone: tactical/strategic, deep modules, accidental complexity (5:03, 55:45)</span></td></tr>
+    <tr><td><a href="https://domainlanguage.com/ddd/" target="_blank" rel="noopener">Domain-Driven Design</a></td><td>Eric Evans</td><td><span class="tr-es">Ubiquitous language aplicada a agentes — «un poco de tomo», con los primeros capítulos basta (14:12)</span><span class="tr-en">Ubiquitous language applied to agents — “a bit of a tome”, the first chapters are enough (14:12)</span></td></tr>
+    <tr><td><a href="https://www.oreilly.com/library/view/working-effectively-with/0596007612/" target="_blank" rel="noopener">Working Effectively with Legacy Code</a></td><td>Michael Feathers</td><td><span class="tr-es">Seams para romper/acoplar código heredado — de 2003 y vigente «antes de los agentes» (97:05)</span><span class="tr-en">Seams to break/decouple legacy code — from 2003, still current “before agents” (97:05)</span></td></tr>
+    <tr><td><a href="https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/" target="_blank" rel="noopener">The Pragmatic Programmer</a></td><td>Andrew Hunt &amp; David Thomas</td><td><span class="tr-es">Mencionado en la lista de clásicos para empezar (98:01)</span><span class="tr-en">Mentioned in the list of classics to start with (98:01)</span></td></tr>
+    <tr><td><a href="https://refactoring.com/" target="_blank" rel="noopener">Refactoring</a></td><td>Martin Fowler</td><td><span class="tr-es">El vocabulario de los bad smells que las skills usan al proponer mejoras (98:01)</span><span class="tr-en">The bad-smell vocabulary the skills use when proposing improvements (98:01)</span></td></tr>
+    <tr><td><a href="https://www.amazon.com/Extreme-Programming-Explained-Embrace-Change/dp/0321895613" target="_blank" rel="noopener">Extreme Programming Explained</a></td><td>Kent Beck</td><td><span class="tr-es">Feedback loops y ciclos cortos como antecedente histórico (98:01)</span><span class="tr-en">Feedback loops and short cycles as the historical antecedent (98:01)</span></td></tr>
+  </table>
+  <p class="dim"><span class="tr-es">Consejo textual del episodio: «if you actually do the reading, it puts you way ahead of everybody else» — y el léxico de estos libros es literalmente el de las skills.</span><span class="tr-en">Verbatim advice from the episode: “if you actually do the reading, it puts you way ahead of everybody else” — and the lexicon of these books is literally the lexicon of the skills.</span></p>
+</section>
+
+<!-- ============ ENLACES ============ -->
+<section id="enlaces">
+  <div class="sec-head"><h2><span class="tr-es">Enlaces: repos, cursos, herramientas</span><span class="tr-en">Links: repos, courses, tools</span></h2>
+  <p class="dim"><span class="tr-es">Todo lo que aparece en el video, con URL verificada. Donde el video solo dio el nombre, se verificó por búsqueda.</span><span class="tr-en">Everything that appears in the video, with verified URLs. Where the video only gave the name, it was verified by search.</span></p></div>
+
+  <div class="group-label"><span class="tr-es">De Matt Pocock</span><span class="tr-en">From Matt Pocock</span></div>
+  <table>
+    <tr><th><span class="tr-es">Recurso</span><span class="tr-en">Resource</span></th><th><span class="tr-es">Qué es</span><span class="tr-en">What it is</span></th></tr>
+    <tr><td><a href="https://www.aihero.dev/skills" target="_blank" rel="noopener">aihero.dev/skills</a></td><td><span class="tr-es">Documentación e instalación de las 27 skills (grill-with-docs, to-spec, implement-spec, retro…)</span><span class="tr-en">Documentation and installation for the 27 skills (grill-with-docs, to-spec, implement-spec, retro…)</span></td></tr>
+    <tr><td><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener">github.com/mattpocock/skills</a></td><td><span class="tr-es">El repo — «Skills for Real Engineers», extraído de su</span><span class="tr-en">The repo — “Skills for Real Engineers”, extracted from his</span> <code>.agents/</code><span class="tr-es">; cerró los PRs externos por los slop PRs</span><span class="tr-en">; he closed external PRs due to slop PRs</span></td></tr>
+    <tr><td><a href="https://www.aihero.dev" target="_blank" rel="noopener">aihero.dev</a></td><td><span class="tr-es">Su escuela de AI engineering; curso «Software Factories for Real Engineers» + newsletter</span><span class="tr-en">His AI engineering school; “Software Factories for Real Engineers” course + newsletter</span></td></tr>
+    <tr><td><a href="https://github.com/mattpocock/dictionary-of-ai-coding" target="_blank" rel="noopener">dictionary-of-ai-coding</a></td><td><span class="tr-es">Su AI Coding Dictionary: todos los términos (slop PR, software factory, automated checks…) en un grafo</span><span class="tr-en">His AI Coding Dictionary: every term (slop PR, software factory, automated checks…) in a graph</span></td></tr>
+    <tr><td><a href="https://github.com/mattpocock/sandcastle" target="_blank" rel="noopener">sandcastle</a></td><td><span class="tr-es">«S castle» del audio: orquestación de agentes sandboxeados (Docker/Podman) en TypeScript</span><span class="tr-en">the “S castle” from the audio: orchestration of sandboxed agents (Docker/Podman) in TypeScript</span></td></tr>
+    <tr><td><a href="https://github.com/mattpocock/ts-reset" target="_blank" rel="noopener">ts-reset</a></td><td><span class="tr-es">Su clásico: un «CSS reset» para los tipos de JavaScript</span><span class="tr-en">His classic: a “CSS reset” for JavaScript types</span></td></tr>
+    <tr><td><a href="https://www.totaltypescript.com" target="_blank" rel="noopener">totaltypescript.com</a></td><td><span class="tr-es">Total TypeScript — el curso que lo hizo famoso (ex-employee de Vercel)</span><span class="tr-en">Total TypeScript — the course that made him famous (ex-Vercel employee)</span></td></tr>
+  </table>
+
+  <div class="group-label"><span class="tr-es">Herramientas del setup</span><span class="tr-en">Setup tools</span></div>
+  <table>
+    <tr><th><span class="tr-es">Categoría</span><span class="tr-en">Category</span></th><th><span class="tr-es">En el video</span><span class="tr-en">In the video</span></th></tr>
+    <tr><td><span class="tr-es">Agente/harness</span><span class="tr-en">Agent/harness</span></td><td><a href="https://claude.com/claude-code" target="_blank" rel="noopener">Claude Code</a> <span class="tr-es">(con skills + sub agents); modelos Opus 5.5 / Effort; mención a</span><span class="tr-en">(with skills + sub agents); Opus 5.5 / Effort models; mention of</span> <a href="https://github.com/openai/codex" target="_blank" rel="noopener">Codex</a></td></tr>
+    <tr><td>Editor / VCS</td><td><a href="https://code.visualstudio.com" target="_blank" rel="noopener">VS Code</a> · <a href="https://git-scm.com" target="_blank" rel="noopener">Git</a> (worktrees) · <a href="https://github.com" target="_blank" rel="noopener">GitHub</a> + <a href="https://github.com/features/actions" target="_blank" rel="noopener">Actions</a> + <a href="https://github.com/features/pages" target="_blank" rel="noopener">Pages</a></td></tr>
+    <tr><td><span class="tr-es">Lenguaje / librerías</span><span class="tr-en">Language / libraries</span></td><td><a href="https://www.typescriptlang.org" target="_blank" rel="noopener">TypeScript</a> <span class="tr-es">estricto ·</span><span class="tr-en">strict ·</span> <a href="https://effect.website" target="_blank" rel="noopener">Effect</a> <span class="tr-es">(la librería de sus standards) ·</span><span class="tr-en">(the library of his standards) ·</span> <a href="https://github.com/honojs/hono" target="_blank" rel="noopener">Hono</a> <span class="tr-es">(el caso de los slop PRs)</span><span class="tr-en">(the slop PRs case)</span></td></tr>
+    <tr><td>Data</td><td><a href="https://www.postgresql.org" target="_blank" rel="noopener">Postgres</a> · <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a> · <a href="https://planetscale.com" target="_blank" rel="noopener">PlanetScale</a></td></tr>
+    <tr><td>Hosting</td><td><a href="https://vercel.com" target="_blank" rel="noopener">Vercel</a> · <a href="https://www.netlify.com" target="_blank" rel="noopener">Netlify</a> · <a href="https://www.cloudflare.com" target="_blank" rel="noopener">Cloudflare</a> <span class="tr-es">(DNS/DDoS) · evitar AWS manual</span><span class="tr-en">(DNS/DDoS) · avoid manual AWS</span></td></tr>
+    <tr><td><span class="tr-es">Voz / hardware</span><span class="tr-en">Voice / hardware</span></td><td><span class="tr-es">Whisper Flow (dictado) · Pixel Watch · dispositivos de terminal físicos · teleprompter estilo Elgato</span><span class="tr-en">Whisper Flow (dictation) · Pixel Watch · physical terminal devices · Elgato-style teleprompter</span></td></tr>
+    <tr><td><span class="tr-es">Video (sus pipelines)</span><span class="tr-en">Video (his pipelines)</span></td><td><a href="https://github.com/mattpocock/course-video-manager" target="_blank" rel="noopener">course-video-manager</a> (2,500 commits) · <a href="https://ai.google.dev/gemini-api" target="_blank" rel="noopener">Gemini video API</a> <span class="tr-es">· frame.io (clonado por Chuck) · Adobe Premiere</span><span class="tr-en">· frame.io (cloned by Chuck) · Adobe Premiere</span></td></tr>
+    <tr><td><span class="tr-es">Laboratorio de Chuck</span><span class="tr-en">Chuck's lab</span></td><td><a href="https://www.proxmox.com" target="_blank" rel="noopener">Proxmox</a> · <a href="https://about.gitea.com" target="_blank" rel="noopener">Gitea</a> self-host · Docker/Podman</td></tr>
+  </table>
+
+  <div class="group-label"><span class="tr-es">Cursos y comunidades</span><span class="tr-en">Courses and communities</span></div>
+  <table>
+    <tr><th><span class="tr-es">Recurso</span><span class="tr-en">Resource</span></th><th><span class="tr-es">Nota</span><span class="tr-en">Note</span></th></tr>
+    <tr><td><a href="https://www.networkchuck.com" target="_blank" rel="noopener">networkchuck.com</a> (Academy)</td><td><span class="tr-es">La escuela de NetworkChuck; el podcast vive en su canal</span><span class="tr-en">NetworkChuck's school; the podcast lives on his channel</span></td></tr>
+    <tr><td><a href="https://github.com/humanlayer/12-factor-agents" target="_blank" rel="noopener">humanlayer/12-factor-agents</a></td><td><span class="tr-es">Los principios de Dex Horthy — origen de la smart/dumb zone</span><span class="tr-en">Dex Horthy's principles — origin of the smart/dumb zone</span></td></tr>
+    <tr><td><span class="tr-es">Discord de Matt</span><span class="tr-en">Matt's Discord</span></td><td><span class="tr-es">«my evals are people»: la comunidad reporta issues; enlace de invitación en mattpocock.com</span><span class="tr-en">“my evals are people”: the community reports issues; invite link at mattpocock.com</span></td></tr>
+    <tr><td><a href="https://github.com/humanlayer/humanlayer" target="_blank" rel="noopener">humanlayer/humanlayer</a></td><td><span class="tr-es">El framework de agentes de Dex, citado en el episodio</span><span class="tr-en">Dex's agent framework, cited in the episode</span></td></tr>
+  </table>
+</section>
+
+<!-- ============ PERSONAS ============ -->
+<section id="personas">
+  <div class="sec-head"><h2><span class="tr-es">Personas referenciadas</span><span class="tr-en">People referenced</span></h2></div>
+
+  <div class="person">
+    <h3><a href="https://mattpocock.com" target="_blank" rel="noopener">Matt Pocock</a> <span class="tr-es">— el invitado</span><span class="tr-en">— the guest</span></h3>
+    <p class="dim"><span class="tr-es">TypeScript educator → AI engineering educator. Ex-Vercel, core de XState, autor de Total TypeScript. Su repo de skills es el más starreado del mundo en su categoría. «I teach devs for a living.»</span><span class="tr-en">TypeScript educator → AI engineering educator. Ex-Vercel, XState core, author of Total TypeScript. His skills repo is the most-starred in the world in its category. “I teach devs for a living.”</span></p>
+    <div class="links">
+      <a href="https://x.com/mattpocockuk" target="_blank" rel="noopener">X/Twitter</a><a href="https://github.com/mattpocock" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.youtube.com/@mattpocockuk" target="_blank" rel="noopener">YouTube (446K)</a><a href="https://www.aihero.dev" target="_blank" rel="noopener">AI Hero</a>
+      <a href="https://www.totaltypescript.com" target="_blank" rel="noopener">Total TypeScript</a><a href="https://mattpocock.com" target="_blank" rel="noopener">Web + Discord</a>
+    </div>
+  </div>
+
+  <div class="person">
+    <h3><a href="https://www.networkchuck.com" target="_blank" rel="noopener">NetworkChuck</a> <span class="tr-es">— el anfitrión</span><span class="tr-en">— the host</span></h3>
+    <p class="dim"><span class="tr-es">Zach Starzynski. 5.4M suscriptores; redes, homelab y ahora pipelines de edición con IA («offload it, ingest it») sobre Proxmox + Gitea.</span><span class="tr-en">Zach Starzynski. 5.4M subscribers; networking, homelab and now AI editing pipelines (“offload it, ingest it”) on Proxmox + Gitea.</span></p>
+    <div class="links">
+      <a href="https://www.youtube.com/@NetworkChuck" target="_blank" rel="noopener">YouTube</a><a href="https://x.com/networkchuck" target="_blank" rel="noopener">X/Twitter</a>
+      <a href="https://www.instagram.com/networkchuck/" target="_blank" rel="noopener">Instagram</a><a href="https://www.facebook.com/NetworkChuck/" target="_blank" rel="noopener">Facebook</a>
+      <a href="https://ntck.co/discord" target="_blank" rel="noopener">Discord</a>
+    </div>
+  </div>
+
+  <div class="person">
+    <h3><a href="https://x.com/poteto" target="_blank" rel="noopener">Lauren Tan «Potato»</a></h3>
+    <p class="dim"><span class="tr-es">Autora de la trust ladder; célebre por ~2,500 PRs/mes con agentes (Cursor → xAI, en el equipo de Grok bot). La referencia de «cuánto arriba puede llegar la escalera».</span><span class="tr-en">Author of the trust ladder; famous for ~2,500 PRs/month with agents (Cursor → xAI, on the Grok bot team). The reference for “how high the ladder can go”.</span></p>
+    <div class="links"><a href="https://x.com/poteto" target="_blank" rel="noopener">X/Twitter</a><a href="https://github.com/poteto" target="_blank" rel="noopener">GitHub</a></div>
+  </div>
+
+  <div class="person">
+    <h3><a href="https://x.com/dexhorthy" target="_blank" rel="noopener">Dex Horthy</a></h3>
+    <p class="dim"><span class="tr-es">Autor de la idea smart zone / dumb zone y de 12-factor-agents (HumanLayer). Matt bromeó con tenerlo de invitado; Chuck aceptó.</span><span class="tr-en">Author of the smart zone / dumb zone idea and of 12-factor-agents (HumanLayer). Matt joked about having him as a guest; Chuck accepted.</span></p>
+    <div class="links"><a href="https://x.com/dexhorthy" target="_blank" rel="noopener">X/Twitter</a><a href="https://github.com/dexhorthy" target="_blank" rel="noopener">GitHub</a><a href="https://humanlayer.dev" target="_blank" rel="noopener">HumanLayer</a></div>
+  </div>
+
+  <div class="person">
+    <h3>John Ousterhout</h3>
+    <p class="dim"><span class="tr-es">Profesor de Stanford (CS) y autor de</span><span class="tr-en">Stanford professor (CS) and author of</span> <i>A Philosophy of Software Design</i> <span class="tr-es">— la columna vertebral teórica del episodio (tactical/strategic, deep modules). Sin redes sociales relevantes; su</span><span class="tr-en">— the theoretical backbone of the episode (tactical/strategic, deep modules). No relevant social media; his</span> <a href="https://web.stanford.edu/~ouster/cgi-bin/home.php" target="_blank" rel="noopener"><span class="tr-es">página académica</span><span class="tr-en">academic page</span></a>.</p>
+  </div>
+
+  <div class="person">
+    <h3><a href="https://x.com/karpathy" target="_blank" rel="noopener">Andrej Karpathy</a></h3>
+    <p class="dim"><span class="tr-es">Referencia del «Karpathy-style LLM wiki» que Matt usa como base de sus agentes personales. (Su concepto original:</span><span class="tr-en">The reference for the “Karpathy-style LLM wiki” Matt uses as the base for his personal agents. (His original concept:</span> <a href="https://karpathy.bearblog.dev/blog/llm-os/" target="_blank" rel="noopener">LLMs as OS</a> <span class="tr-es">/ nanoGPT como punto de partida.)</span><span class="tr-en">/ nanoGPT as a starting point.)</span></p>
+    <div class="links"><a href="https://x.com/karpathy" target="_blank" rel="noopener">X/Twitter</a><a href="https://github.com/karpathy" target="_blank" rel="noopener">GitHub</a></div>
+  </div>
+
+  <div class="person">
+    <h3><span class="tr-es">Los clásicos</span><span class="tr-en">The classics</span></h3>
+    <p class="dim"><a href="https://domainlanguage.com/" target="_blank" rel="noopener">Eric Evans</a> (DDD) · Michael Feathers (Legacy Code, <a href="https://agilemodeling.com/" target="_blank" rel="noopener">agilemodeling.com</a>) · <a href="https://martinfowler.com" target="_blank" rel="noopener">Martin Fowler</a> (Refactoring) · Kent Beck (XP) · <a href="https://pragprog.com" target="_blank" rel="noopener">Andy Hunt &amp; Dave Thomas</a> <span class="tr-es">(Pragmatic Programmer). Citados como autores, sin presencia social activa en el episodio.</span><span class="tr-en">(Pragmatic Programmer). Cited as authors, with no active social presence in the episode.</span></p>
+  </div>
+</section>
+
+<!-- ============ EXTRAS ============ -->
+<section id="extras">
+  <div class="sec-head"><h2><span class="tr-es">Extras y detalles relevantes</span><span class="tr-en">Extras and relevant details</span></h2></div>
+
+  <h3 style="margin:14px 0 4px"><span class="tr-es">Muro de citas</span><span class="tr-en">Quote wall</span></h3>
+  <div class="qwall">
+    <blockquote><span class="tr-es">"if you're not dictating, you're just going way too slow, basically."</span><span class="tr-en">“if you're not dictating, you're just going way too slow, basically.”</span><cite><span class="tr-es">— 16:14 · sobre Whisper Flow</span><span class="tr-en">— 16:14 · on Whisper Flow</span></cite></blockquote>
+    <blockquote><span class="tr-es">"I consider there to be a smart zone and a dumb zone inside these context windows."</span><span class="tr-en">“I consider there to be a smart zone and a dumb zone inside these context windows.”</span><cite><span class="tr-es">— 25:56 · atribuida a Dex Horthy</span><span class="tr-en">— 25:56 · attributed to Dex Horthy</span></cite></blockquote>
+    <blockquote><span class="tr-es">"you sort of walk up this trust ladder."</span><span class="tr-en">“you sort of walk up this trust ladder.”</span><cite><span class="tr-es">— 45:12 · el concepto de Lauren Tan</span><span class="tr-en">— 45:12 · Lauren Tan's concept</span></cite></blockquote>
+    <blockquote><span class="tr-es">"you need to know enough strategic programming to be dangerous."</span><span class="tr-en">“you need to know enough strategic programming to be dangerous.”</span><cite><span class="tr-es">— ~71:30 · lo que aún debes aprender</span><span class="tr-en">— ~71:30 · what you still need to learn</span></cite></blockquote>
+    <blockquote><span class="tr-es">"Phones are poison."</span><span class="tr-en">“Phones are poison.”</span><cite><span class="tr-es">— segmento central · la adicción que ambos admiten</span><span class="tr-en">— mid-episode · the addiction they both admit to</span></cite></blockquote>
+    <blockquote><span class="tr-es">"you're essentially just trying to fight back against the wave of slop."</span><span class="tr-en">“you're essentially just trying to fight back against the wave of slop.”</span><cite><span class="tr-es">— 62:50 · los cron jobs de arquitectura</span><span class="tr-en">— 62:50 · the architecture cron jobs</span></cite></blockquote>
+    <blockquote><span class="tr-es">"the thing that differentiates good products is not the tokens spent, but the attention given."</span><span class="tr-en">“the thing that differentiates good products is not the tokens spent, but the attention given.”</span><cite><span class="tr-es">— recta final · el argumento del care</span><span class="tr-en">— closing stretch · the care argument</span></cite></blockquote>
+    <blockquote><span class="tr-es">"my evals are people."</span><span class="tr-en">“my evals are people.”</span><cite><span class="tr-es">— 81:30 · cómo evalúa skills con millones de usuarios</span><span class="tr-en">— 81:30 · how he evaluates skills with millions of users</span></cite></blockquote>
+  </div>
+
+  <h3 style="margin:26px 0 4px"><span class="tr-es">Perlas menores del episodio</span><span class="tr-en">Minor gems from the episode</span></h3>
+  <table>
+    <tr><th><span class="tr-es">Hallazgo</span><span class="tr-en">Finding</span></th><th><span class="tr-es">Detalle</span><span class="tr-en">Detail</span></th></tr>
+    <tr><td><span class="tr-es">Contrato con Anthropic</span><span class="tr-en">The Anthropic deal</span></td><td><span class="tr-es">Una sola suscripción, plan 20x. Chuck paga tres suscripciones + Codex y effort extra-high — Matt lo mira con pena (30:13).</span><span class="tr-en">A single subscription, 20x plan. Chuck pays for three subscriptions + Codex and extra-high effort — Matt looks at him with pity (30:13).</span></td></tr>
+    <tr><td><span class="tr-es">«Evals son personas»</span><span class="tr-en">“Evals are people”</span></td><td><span class="tr-es">Con millones de usuarios de skills, un agente diario reproduce los issues reportados en un dummy repo, filtra spam y abre PRs (81:30).</span><span class="tr-en">With millions of skill users, a daily agent reproduces the reported issues in a dummy repo, filters spam and opens PRs (81:30).</span></td></tr>
+    <tr><td><span class="tr-es">Dark factory, no</span><span class="tr-en">No dark factory</span></td><td><span class="tr-es">Rechaza los «dark factories»: prefiere «dimmer switches» — tú eliges qué habitaciones del codebase iluminas (54:29).</span><span class="tr-en">He rejects “dark factories”: he prefers “dimmer switches” — you choose which rooms of the codebase to light up (54:29).</span></td></tr>
+    <tr><td><span class="tr-es">Los PRs automáticos en masa</span><span class="tr-en">Mass automatic PRs</span></td><td><span class="tr-es">Su consejo a quien empiece a enviar PRs masivos a open source: no. Issues + evidencia primero (88:52).</span><span class="tr-en">His advice to anyone starting to mass-PR open source: no. Issues + evidence first (88:52).</span></td></tr>
+    <tr><td><span class="tr-es">Contratación</span><span class="tr-en">Hiring</span></td><td><span class="tr-es">Al contratar: proyectos publicados, hermosos, desplegables — «sé que sabes lo que haces y lo haces todo con agentes» (95:37). El título CS sigue siendo válido, pero el care pesa más.</span><span class="tr-en">When hiring: published projects, beautiful, deployable — “I know you know what you're doing and you do it all with agents” (95:37). The CS degree is still valid, but care weighs more.</span></td></tr>
+    <tr><td><span class="tr-es">Un Rubik's</span><span class="tr-en">A Rubik's cube</span></td><td><span class="tr-es">Usó su skill</span><span class="tr-en">He used his</span> <code>teach</code> <span class="tr-es">para aprender a resolver un cubo de Rubik: genera cursos personalizados con quizzes (68:42).</span><span class="tr-en">skill to learn to solve a Rubik's cube: it generates personalized courses with quizzes (68:42).</span></td></tr>
+    <tr><td><span class="tr-es">Sponsors del episodio</span><span class="tr-en">Episode sponsors</span></td><td><span class="tr-es">ThreatLocker (Zero Trust World, feb 2027), Coveron (protección de identidad) y Bitdefender RealCheck (detector de deepfakes). Menciones pagadas, sin relación con el contenido técnico.</span><span class="tr-en">ThreatLocker (Zero Trust World, Feb 2027), Coveron (identity protection) and Bitdefender RealCheck (deepfake detector). Paid mentions, unrelated to the technical content.</span></td></tr>
+    <tr><td><span class="tr-es">Nota de fidelidad</span><span class="tr-en">Fidelity note</span></td><td><span class="tr-es">Transcripción automática: «Opus 5.5», «Whisper Flow», «Sandcastle» y «Lauren Tan» están normalizados según el contexto del audio; los modelos/productos que Matt nombra en vivo pueden variar ligeramente. Verificado contra links del video y perfiles públicos.</span><span class="tr-en">Automated transcript: “Opus 5.5”, “Whisper Flow”, “Sandcastle” and “Lauren Tan” are normalized per the audio context; the models/products Matt names live may vary slightly. Verified against video links and public profiles.</span></td></tr>
+  </table>
+</section>
+
+<footer style="margin-top:56px; padding-top:16px; border-top:1px solid var(--line); font-size:12px; color:var(--dim)">
+<span class="tr-es">Recurso no oficial de fans, sin afiliación con NetworkChuck ni Matt Pocock. Citas breves con fines de comentario educativo; todos los materiales pertenecen a sus autores. Informe generado el 21 de noviembre de 2026 a partir de la transcripción completa del episodio (youtu.be/mU8WKII1gpk, 2:01:41, The NetworkChuck Podcast) y de los enlaces oficiales de los participantes. Los diagramas reproducen el flujo descrito en vivo en los minutos citados.</span><span class="tr-en">Unofficial fan-made resource, not affiliated with NetworkChuck or Matt Pocock. Short quotations for educational commentary; all materials belong to their authors. Report generated on November 21, 2026 from the full transcript of the episode (youtu.be/mU8WKII1gpk, 2:01:41, The NetworkChuck Podcast) and the participants' official links. The diagrams reproduce the flow described live at the cited minutes.</span>
+</footer>
+
+<script>
+// accordions
+document.querySelectorAll('.acc-btn').forEach(b=>b.addEventListener('click',()=>b.parentElement.classList.toggle('open')));
+// scroll spy
+const secs=[...document.querySelectorAll('section[id]')], links=[...document.querySelectorAll('nav a')];
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id));}})},{rootMargin:'-20% 0px -70% 0px'});
+secs.forEach(s=>io.observe(s));
+// study progress
+(function(){const D=String.fromCharCode(8230);
+[['hac'+D+'uide','hacer-code-ai-guia'],['hac'+D+'-lang','hacer-code-ai-lang'],['hacer'+D+'heme','hacer-code-ai-theme']]
+.forEach(([o,n])=>{try{const v=localStorage.getItem(o);if(v!==null&&localStorage.getItem(n)===null){localStorage.setItem(n,v);localStorage.removeItem(o)}}catch(e){}});})();
+const boxes=[...document.querySelectorAll('.mod input[type=checkbox]')];
+const KEY='hacer-'+'code-ai-'+'guia';
+let saved={}; try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+let LANGEN=false;
+function refresh(){
+  const done=boxes.filter(b=>saved[b.dataset.k]).length;
+  const pct=Math.round(done/boxes.length*100);
+  document.getElementById('prog').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=LANGEN
+    ? done+' of '+boxes.length+' tasks · '+pct+'%'
+    : done+' de '+boxes.length+' tareas · '+pct+'%';
+  document.querySelectorAll('.mod').forEach(m=>m.classList.toggle('done', [...m.querySelectorAll('input')].every(i=>saved[i.dataset.k])));
+}
+boxes.forEach(b=>{ b.checked=!!saved[b.dataset.k];
+  b.addEventListener('change',()=>{ saved[b.dataset.k]=b.checked; localStorage.setItem(KEY,JSON.stringify(saved)); refresh(); });});
+// language toggle
+const LKEY='hacer-'+'code-ai-'+'lang';
+const TITLES={es:'Informe · How to Actually Code with AI (NetworkChuck × Matt Pocock)',en:'Report · How to Actually Code with AI (NetworkChuck × Matt Pocock)'};
+function setLang(en){
+  LANGEN=en;
+  tbtn.textContent=en?'ES':'EN';
+  document.body.classList.toggle('lang-en',en);
+  document.documentElement.lang=en?'en':'es';
+  document.title=en?TITLES.en:TITLES.es;
+  localStorage.setItem(LKEY,en?'en':'es');
+  refresh();
+}
+const tbtn=document.getElementById('langToggle');
+tbtn.addEventListener('click',()=>setLang(!LANGEN));
+// theme toggle
+const THEMEKEY='hacer-'+'code-ai-'+'theme';
+const tbtn2=document.getElementById('themeToggle');
+function setTheme(light){
+  document.documentElement.classList.toggle('theme-light',light);
+  tbtn2.textContent=light?'☾':'☀';
+  localStorage.setItem(THEMEKEY,light?'light':'dark');
+}
+tbtn2.addEventListener('click',()=>setTheme(!document.documentElement.classList.contains('theme-light')));
+try{ setTheme(localStorage.getItem(THEMEKEY)==='light'); }catch(e){ setTheme(false); }
+try{ setLang(localStorage.getItem(LKEY)!=='es'); }catch(e){ setLang(true); }
+</script>
+</body>
+</html>
